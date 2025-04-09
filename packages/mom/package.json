@@ -1,0 +1,49 @@
+{
+    "name": "@asimojs/mom",
+    "version": "0.0.1",
+    "description": "mom - component system for react apps",
+    "main": "dist/mom.mjs",
+    "types": "dist/index.d.ts",
+    "typings": "dist/index.d.ts",
+    "files": [
+        "src",
+        "dist"
+    ],
+    "author": "Bertrand Laporte",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/asimojs/mom"
+    },
+    "license": "MIT",
+    "bugs": "https://github.com/asimojs/mom/issues",
+    "keywords": [
+        "HMVC",
+        "MVC",
+        "state",
+        "ui components",
+        "reactive",
+        "reactivity",
+        "mobx",
+        "observable",
+        "react",
+        "preact",
+        "model",
+        "integration tests"
+    ],
+    "scripts": {
+        "clean": "rimraf dist lib",
+        "build": "yarn clean && tsc && vite build && cp -R lib/*.d.ts dist",
+        "test": "vitest",
+        "coverage": "vitest run --coverage",
+        "prepublish": "yarn build && vitest run",
+        "npm-publish": "yarn prepublish && npm publish --access public"
+    },
+    "devDependencies": {
+        "@asimojs/asimo": "^3.0.0",
+        "@vitest/coverage-v8": "^3.1.1",
+        "rimraf": "6.0.1",
+        "typescript": "^5.8.3",
+        "vite": "^6.2.5",
+        "vitest": "^3.1.1"
+    }
+}
