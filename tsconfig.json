@@ -10,15 +10,7 @@
         "removeComments": false,
         "preserveConstEnums": true,
         "jsx": "react-jsx",
-        "lib": [
-            "ESNext",
-            "DOM"
-        ]
+        "lib": ["ESNext", "DOM"]
     },
-    "exclude": [
-        "node_modules",
-        "**/*.spec.ts",
-        "**/__tests__",
-        "**/__mocks__"
-    ]
+    "exclude": ["node_modules", "lib"]
 }
