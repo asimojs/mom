@@ -23,6 +23,13 @@ configure({
   enforceActions: "never",
 });
 
+interface MomComponentInternalContext<ModelType extends MomModel> extends MomComponentContext<ModelType> {
+  init?(): void | Promise<void>;
+  dispose?(): void;
+}
+
+const DONE = Promise.resolve();
+
 export const mom: Mom = {
   /**
    * Define a mom component
@@ -30,18 +37,50 @@ export const mom: Mom = {
    * @param cf the component function
    */
   component<ModelType extends MomModel>(
-    componentIID: InterfaceId<MomComponent<ModelType>>,
-    cf: (m: MomComponentContext<ModelType>, props: ModelType["$props"]) => void
+    componentIIDorCf:
+      | InterfaceId<MomComponent<ModelType>>
+      | ((m: MomComponentContext<ModelType>, props: ModelType["$props"]) => void),
+    cf?: (m: MomComponentContext<ModelType>, props: ModelType["$props"]) => void
   ): MomComponent<ModelType> {
-    function cptFunction(m: MomComponentContext<ModelType>, props: ModelType["$props"]): Public<ModelType> {
-      cf(m, props);
-      // TODO: call m.init()
+    let cptFn: (m: MomComponentContext<ModelType>, props: ModelType["$props"]) => void;
+    let componentIID: InterfaceId<MomComponent<ModelType>> | null = null;
+    let ns = "";
+    if (typeof componentIIDorCf === "function") {
+      cptFn = componentIIDorCf;
+    } else {
+      ns = componentIIDorCf.ns;
+      if (cf === undefined) {
+        throw "";
+      }
+      cptFn = cf;
+    }
+
+    function cpt(m: MomComponentContext<ModelType>, props: ModelType["$props"]): Public<ModelType> {
+      cptFn(m, props);
+      const mi = m as MomComponentInternalContext<ModelType>;
+      const initResult = mi.init?.();
+      if (
+        initResult &&
+        typeof initResult === "object" &&
+        "then" in initResult &&
+        typeof initResult.then === "function"
+      ) {
+        mi.model!.$initialized = false;
+        mi.model!.$initComplete = initResult.then(() => {
+          mi.model!.$initialized = true;
+        });
+      } else {
+        mi.model!.$initialized = true;
+        mi.model!.$initComplete = DONE;
+      }
       return m.model! as unknown as Public<ModelType>;
     }
-    (cptFunction as MomComponent<ModelType>).$ns = componentIID.ns;
-    asm.registerFactory(componentIID, () => cptFunction as MomComponent<ModelType>);
+    (cpt as MomComponent<ModelType>).$ns = ns;
+    if (componentIID) {
+      asm.registerFactory(componentIID, () => cpt as MomComponent<ModelType>);
+    }
 
-    return cptFunction as MomComponent<ModelType>;
+    return cpt as MomComponent<ModelType>;
   },
 
   /**
@@ -70,7 +109,7 @@ export const mom: Mom = {
 
     function createMomComponentContext(): MomComponentContext<ModelType> {
       let createModelCalled = false;
-      const momCtxt = {
+      const momCtxt: MomComponentInternalContext<ModelType> = {
         context,
         model: null as ModelType | null,
         createModel(def: MomComponentDefinition<ModelType>): ModelType {
@@ -86,6 +125,8 @@ export const mom: Mom = {
             ...def.initialModel,
           }) as unknown as ModelType;
           momCtxt.model = model;
+          momCtxt.init = def.init;
+          momCtxt.dispose = def.dispose;
           return model;
         },
       };

@@ -13,6 +13,9 @@ export interface Mom {
     componentIID: InterfaceId<MomComponent<ModelType>>,
     cf: (m: MomComponentContext<ModelType>, props: ModelType["$props"]) => void
   ): MomComponent<ModelType>;
+  component<ModelType extends MomModel>(
+    cf: (m: MomComponentContext<ModelType>, props: ModelType["$props"]) => void
+  ): MomComponent<ModelType>;
 
   /**
    * Instantiate a mom component
@@ -62,7 +65,7 @@ export interface MomComponentContext<ModelType extends MomModel> {
 
 export interface MomComponentDefinition<ModelType extends MomModel> {
   /** Model initial values - before load() gets called */
-  initialModel: Omit<ModelType, "$ns" | "$props" | "$actions" | "$context">;
+  initialModel: MomInitialModelValues<ModelType>;
   /** Model actions (public methods exposed to the view and parent components) */
   actions: ModelType["$actions"];
   /**
@@ -74,6 +77,11 @@ export interface MomComponentDefinition<ModelType extends MomModel> {
   dispose?(): void;
 }
 
+export type MomInitialModelValues<ModelType> = Omit<
+  ModelType,
+  "$ns" | "$props" | "$actions" | "$context" | "$initialized" | "$initComplete"
+>;
+
 export interface MomModel<ModelProps extends object = {}, ModelActions = unknown> {
   /** The component interface namespace */
   $ns: string;
@@ -83,6 +91,10 @@ export interface MomModel<ModelProps extends object = {}, ModelActions = unknown
   $props: ModelProps;
   /** The component actions: the functions exposed to the component view(s) and the component parents */
   $actions: ModelActions;
+  /** True when the initialization is complete (init may be asynchronous) */
+  $initialized: boolean;
+  /** Promise resolving when initialization is complete */
+  $initComplete: Promise<void>;
 }
 
 /** DeepReadonly from https://stackoverflow.com/questions/41879327/deepreadonly-object-typescript */
