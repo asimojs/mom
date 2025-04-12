@@ -10,18 +10,30 @@ export interface Mom {
    * @param cf the component function
    */
   component<ModelType extends MomModel>(
-    componentIID: InterfaceId<ModelType>,
-    cf: (m: MomContext<ModelType>, props: ModelType["$props"]) => void
+    componentIID: InterfaceId<MomComponent<ModelType>>,
+    cf: (m: MomComponentContext<ModelType>, props: ModelType["$props"]) => void
   ): MomComponent<ModelType>;
 
   /**
    * Instantiate a mom component
    * @returns a the component model (readonly except for $props)
    */
-  load<ModelType extends MomModel>(cpt: { $cpt: MomComponent<ModelType> } & ModelType["$props"]): Public<ModelType>;
+  load<ModelType extends MomModel>(
+    cpt: { $cpt: MomComponent<ModelType> } & ModelType["$props"],
+    options?: MomLoadOptions
+  ): Public<ModelType>;
 }
 
-export interface MomComponent<ModelType extends MomModel> {}
+/** Optional config params to configure a component context */
+export interface MomLoadOptions {
+  /** The dependency context to use for this component - default: root asm */
+  context?: AsmContext;
+}
+export interface MomComponent<ModelType extends MomModel> {
+  /** Component namespace (= IID namespace) */
+  $ns: string;
+  (m: MomComponentContext<ModelType>, props: ModelType["$props"]): Public<ModelType>;
+}
 
 /**
  * Recursively set all values readonly except for the $props
@@ -30,7 +42,7 @@ export type Public<ModelType extends MomModel> = DeepReadonly<Omit<ModelType, "$
   $props: ModelType["$props"];
 };
 
-export interface MomContext<ModelType extends MomModel> {
+export interface MomComponentContext<ModelType extends MomModel> {
   /**
    * The context associated to the component - allows to pass objects or dependencies
    * to all child components without definining explicit props
@@ -38,29 +50,33 @@ export interface MomContext<ModelType extends MomModel> {
    **/
   context: AsmContext;
   /**
-   * Init the component structure - must be called by the component function
-   * After init has completed, the component onLoad method will be called
+   * Component model - null until init() is called
+   */
+  model: ModelType | null;
+  /**
+   * Create the component model
+   * After the component function has completed, the component init method will be called
    **/
-  init(def: MomComponentDefinition<ModelType>): ModelType;
+  createModel(def: MomComponentDefinition<ModelType>): ModelType;
 }
 
 export interface MomComponentDefinition<ModelType extends MomModel> {
   /** Model initial values - before load() gets called */
-  initialModel: Omit<ModelType, "$type" | "$props" | "$actions" | "$context">;
+  initialModel: Omit<ModelType, "$ns" | "$props" | "$actions" | "$context">;
   /** Model actions (public methods exposed to the view and parent components) */
   actions: ModelType["$actions"];
   /**
    * Model initialization function - automatically called after the component function call
    * too load model data that need to be retrieved asynchronously
    **/
-  onLoad?(): void | Promise<void>;
+  init?(): void | Promise<void>;
   /** Component disposal - automatically called when a component is unmounted */
-  onDispose?(): void;
+  dispose?(): void;
 }
 
-export interface MomModel<ModelProps = unknown, ModelActions = unknown> {
-  /** The component interface id namespace */
-  $type: string;
+export interface MomModel<ModelProps extends object = {}, ModelActions = unknown> {
+  /** The component interface namespace */
+  $ns: string;
   /** The context associated to the component - allows to share or retrieve dependencies */
   $context: AsmContext;
   /** The model props - i.e. the arguments that can be passed when mounting the component */

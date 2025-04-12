@@ -1,6 +1,6 @@
-import { MomModel, interfaceId } from "../../mom.types";
+import { MomComponent, MomModel, interfaceId } from "../../mom.types";
 
-export const CounterIID = interfaceId<CounterModel>("mom.examples.counter");
+export const CounterIID = interfaceId<MomComponent<CounterModel>>("mom.examples.counter");
 
 /** Headless counter */
 export interface CounterModel extends MomModel {
@@ -18,6 +18,6 @@ export interface CounterModel extends MomModel {
     /** Reset the counter to the initial value */
     reset(): void;
   };
-  /** The number of times actions have been called */
+  /** The number of times actions (and onChange()) have been called */
   nbrOfChanges: number;
 }

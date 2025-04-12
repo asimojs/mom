@@ -39,8 +39,11 @@
     "prepublish": "yarn build && vitest run",
     "npm-publish": "yarn prepublish && npm publish --access public"
   },
-  "devDependencies": {
+  "dependencies": {
     "@asimojs/asimo": "^3.0.0",
+    "mobx": "^6.13.7"
+  },
+  "devDependencies": {
     "@vitest/coverage-v8": "^3.1.1",
     "rimraf": "6.0.1",
     "typescript": "^5.8.3",

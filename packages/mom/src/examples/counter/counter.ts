@@ -7,7 +7,7 @@ export const Counter = mom.component(CounterIID, (m, props) => {
   }
   const initValue = props.value;
 
-  const model = m.init({
+  const model = m.createModel({
     initialModel: {
       nbrOfChanges: 0,
     },
