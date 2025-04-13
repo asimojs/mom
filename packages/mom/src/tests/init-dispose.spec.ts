@@ -13,7 +13,7 @@ describe("Mom init+dispose", () => {
         context = asm.createChildContext("test:MomInitDispose");
     });
 
-    describe("Sync init", () => {
+    describe("Sync init components", () => {
         let modelBeforeCreate: any = null;
 
         const TestA = mom.component<TestModel>((m) => {
@@ -33,7 +33,7 @@ describe("Mom init+dispose", () => {
             model.value += " + after createModel";
         });
 
-        it("should be called immediately after load", async () => {
+        it("should call init immediately after load", async () => {
             const testA = mom.load({ $cpt: TestA }, { context });
 
             expect(testA.$ns).toBe("");
@@ -44,10 +44,15 @@ describe("Mom init+dispose", () => {
             expect(testA.value).toBe("initial value + after createModel + after init"); // unchanged
         });
 
-        // TODO dispose during init - e.g. if component creation conditions are not met
+        it("should dispose", async () => {
+            const testA = mom.load({ $cpt: TestA }, { context });
+            expect(testA.value).toBe("initial value + after createModel + after init");
+            testA.$dispose();
+            expect(testA.value).toBe("initial value + after createModel + after init + after dispose");
+        });
     });
 
-    describe("Async init", () => {
+    describe("Async init components", () => {
         let modelBeforeCreate: any = null;
 
         const TestB = mom.component<TestModel>((m) => {
@@ -69,14 +74,36 @@ describe("Mom init+dispose", () => {
             model.value += " + after createModel";
         });
 
-        it("should finish with $initComplete", async () => {
+        it("should handle $initComplete", async () => {
             const testB = mom.load({ $cpt: TestB }, { context });
 
             expect(testB.value).toBe("initial value + after createModel + init start");
             expect(testB.$initialized).toBe(false);
+            expect(testB.$disposed).toBe(false);
             await testB.$initComplete;
             expect(testB.$initialized).toBe(true);
+            expect(testB.$disposed).toBe(false);
             expect(testB.value).toBe("initial value + after createModel + init start + after init");
+        });
+
+        it("should dispose during init", async () => {
+            const testB = mom.load({ $cpt: TestB }, { context });
+            expect(testB.$initialized).toBe(false);
+            testB.$dispose();
+            expect(testB.$initialized).toBe(false);
+            expect(testB.$disposed).toBe(true);
+            expect(testB.value).toBe("initial value + after createModel + init start + after dispose");
+        });
+
+        it("should dispose after init", async () => {
+            const testB = mom.load({ $cpt: TestB }, { context });
+            expect(testB.$initialized).toBe(false);
+            await testB.$initComplete;
+            expect(testB.$initialized).toBe(true);
+            testB.$dispose();
+            expect(testB.$initialized).toBe(false);
+            expect(testB.$disposed).toBe(true);
+            expect(testB.value).toBe("initial value + after createModel + init start + after init + after dispose");
         });
     });
 });

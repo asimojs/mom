@@ -13,6 +13,10 @@ export interface Mom {
         componentIID: InterfaceId<MomComponent<ModelType>>,
         cf: (m: MomComponentContext<ModelType>, props: ModelType["$props"]) => void,
     ): MomComponent<ModelType>;
+    /**
+     * Define a mom component
+     * @param cf the component function
+     */
     component<ModelType extends MomModel>(
         cf: (m: MomComponentContext<ModelType>, props: ModelType["$props"]) => void,
     ): MomComponent<ModelType>;
@@ -22,9 +26,9 @@ export interface Mom {
      * @returns a the component model (readonly except for $props)
      */
     load<ModelType extends MomModel>(
-        cpt: { $cpt: MomComponent<ModelType> } & ModelType["$props"],
+        props: { $cpt: MomComponent<ModelType> } & ModelType["$props"],
         options?: MomLoadOptions,
-    ): RO<ModelType>;
+    ): RootModel<ModelType>;
 }
 
 /** Optional config params to configure a component context */
@@ -41,7 +45,15 @@ export interface MomComponent<ModelType extends MomModel> {
 /**
  * Recursively set all values readonly except for the $props
  */
-export type RO<ModelType extends MomModel> = DeepReadonlyExceptProps<ModelType>;
+export type RO<ModelType extends MomModel> = DeepRoExceptProps<ModelType>;
+
+/**
+ * Extended model for root components created with mom.load()
+ */
+export type RootModel<ModelType extends MomModel> = RO<ModelType> & {
+    /** Dispose a root component created with mom.load */
+    $dispose(): void;
+};
 
 export interface MomComponentContext<ModelType extends MomModel> {
     /**
@@ -61,43 +73,61 @@ export interface MomComponentContext<ModelType extends MomModel> {
     createModel(def: MomComponentDefinition<ModelType>): ModelType;
     /**
      * Mount a child component that should be attached to the parent's model
+     * This will:
+     * - call the component init()
+     * - set and update the component.$initialized and component.$initiComplete properties
      * e.g. model.myCpt = m.mount({$cpt: MyCpt, myprop:"hello"});
      **/
-    mount<M extends MomModel>(cpt: { $cpt: MomComponent<M> } & M["$props"]): RO<M>;
+    mount<M extends MomModel>(props: { $cpt: MomComponent<M> } & M["$props"]): RO<M>;
+    /**
+     * Unmount a component - this will:
+     * - recursively call the dispose methods of the component and child components
+     * - set the component.$disposed to true
+     * - set the component.$initialized to false and change the component.$initComplete property
+     * Note: this will not automatically detach the component (i.e. set its parent reference to null)
+     * This will have to be done manually - e.g.
+     * model.myCpt = m.unmount(model.myCpt);
+     * @param cpt
+     * @return null
+     */
+    unmount<M extends MomModel>(cpt: M | null): null;
 }
 
-export type MomComponentDefinition<ModelType extends MomModel> =
-    ModelType["$actions"] extends Record<PropertyKey, never>
-        ? {
-              /** Model initial values - before load() gets called */
-              initialModel: MomInitialModelValues<ModelType>;
-              /**
-               * Model initialization function - automatically called after the component function call
-               * too load model data that need to be retrieved asynchronously
-               **/
-              init?(): void | Promise<void>;
-              /** Component disposal - automatically called when a component is unmounted */
-              dispose?(): void;
-          }
-        : {
-              /** Model initial values - before load() gets called */
-              initialModel: MomInitialModelValues<ModelType>;
-              /** Model actions (public methods exposed to the view and parent components) */
-              actions: ModelType["$actions"];
-              /**
-               * Model initialization function - automatically called after the component function call
-               * too load model data that need to be retrieved asynchronously
-               **/
-              init?(): void | Promise<void>;
-              /** Component disposal - automatically called when a component is unmounted */
-              dispose?(): void;
-          };
+export type MomComponentDefinition<ModelType extends MomModel> = ModelType["$actions"] extends Record<
+    PropertyKey,
+    never
+>
+    ? {
+          /** Model initial values - before load() gets called */
+          initialModel: MomInitialModelValues<ModelType>;
+          /**
+           * Model initialization function - automatically called after the component function call
+           * too load model data that need to be retrieved asynchronously
+           **/
+          init?(): void | Promise<void>;
+          /** Component disposal - automatically called when a component is unmounted */
+          dispose?(): void;
+      }
+    : {
+          /** Model initial values - before load() gets called */
+          initialModel: MomInitialModelValues<ModelType>;
+          /** Model actions (public methods exposed to the view and parent components) */
+          actions: ModelType["$actions"];
+          /**
+           * Model initialization function - automatically called after the component function call
+           * too load model data that need to be retrieved asynchronously
+           **/
+          init?(): void | Promise<void>;
+          /** Component disposal - automatically called when a component is unmounted */
+          dispose?(): void;
+      };
 
 export type MomInitialModelValues<ModelType> = Omit<
     ModelType,
-    "$ns" | "$props" | "$actions" | "$context" | "$initialized" | "$initComplete"
+    "$ns" | "$props" | "$actions" | "$context" | "$initialized" | "$initComplete" | "$disposed"
 >;
 
+/** Base model properties */
 export interface MomModel<ModelProps extends object = {}, ModelActions = {}> {
     /** The component interface namespace */
     $ns: string;
@@ -107,23 +137,25 @@ export interface MomModel<ModelProps extends object = {}, ModelActions = {}> {
     $props: ModelProps;
     /** The component actions: the functions exposed to the component view(s) and the component parents */
     $actions: ModelActions;
-    /** True when the initialization is complete (init may be asynchronous) */
+    /** True when the initialization is complete (init may be asynchronous) and component is NOT disposed */
     $initialized: boolean;
-    /** Promise resolving when initialization is complete */
+    /** Promise resolving when initialization is complete and component is NOT disposed */
     $initComplete: Promise<void>;
+    /** True when a component is disposed */
+    $disposed: boolean;
 }
 
 /** DeepReadonly from https://stackoverflow.com/questions/41879327/deepreadonly-object-typescript */
-type DeepReadonlyExceptProps<T> = T extends (infer R)[]
-    ? DeepReadonlyArray<R>
+type DeepRoExceptProps<T> = T extends (infer R)[]
+    ? RoArray<R>
     : T extends Function
     ? T
     : T extends object
-    ? DeepReadonlyObjectExceptProps<T>
+    ? RoExceptProps<T>
     : T;
 
-interface DeepReadonlyArray<T> extends ReadonlyArray<DeepReadonlyExceptProps<T>> {}
+interface RoArray<T> extends ReadonlyArray<DeepRoExceptProps<T>> {}
 
-type DeepReadonlyObjectExceptProps<T> = {
-    readonly [P in keyof T]: P extends "$props" ? T[P] : DeepReadonlyExceptProps<T[P]>;
+type RoExceptProps<T> = {
+    readonly [P in keyof T]: P extends "$props" | "$context" ? T[P] : DeepRoExceptProps<T[P]>;
 };

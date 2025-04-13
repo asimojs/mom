@@ -7,6 +7,7 @@ import {
     MomLoadOptions,
     MomModel,
     RO,
+    RootModel,
 } from "./mom.types";
 import { observable } from "mobx";
 import { asm } from "@asimojs/asimo";
@@ -27,15 +28,15 @@ configure({
  * Enriched MomComponentContext with internal properties/methods
  * that should not be visible to the component developer to limit confusion/errors
  */
-interface MomComponentInternalContext<ModelType extends MomModel>
-    extends MomComponentContext<ModelType> {
+interface MomComponentInternalContext<ModelType extends MomModel> extends MomComponentContext<ModelType> {
     parent: MomComponentInternalContext<any> | null;
-    childComponents: Set<MomComponentInternalContext<any>> | null;
+    childComponents: Map<MomModel, MomComponentInternalContext<any>> | null;
     init?(): void | Promise<void>;
     dispose?(): void;
 }
 
 const DONE = Promise.resolve();
+const NEVER = new Promise<void>(() => {});
 
 export const mom: Mom = {
     /**
@@ -97,21 +98,28 @@ export const mom: Mom = {
     load<ModelType extends MomModel>(
         cpt: { $cpt: MomComponent<ModelType> } & ModelType["$props"],
         options?: MomLoadOptions,
-    ): RO<ModelType> {
+    ): RootModel<ModelType> {
         const context = options?.context || asm;
 
-        return loadCpt(null, cpt);
+        let rootCtxt: MomComponentInternalContext<any> | null = null;
+        const c = loadCpt(null, cpt);
+        (c as any).$dispose = () => {
+            if (rootCtxt) {
+                disposeCtxt(rootCtxt);
+            }
+        };
+        return c as RootModel<ModelType>;
 
         function loadCpt<M extends MomModel>(
             parent: MomComponentInternalContext<any> | null,
-            cpt: { $cpt: MomComponent<M> } & M["$props"],
+            props: { $cpt: MomComponent<M> } & M["$props"],
         ) {
-            const cptFunction = cpt.$cpt;
-            cpt.$cpt = null as any;
-            const props = observable(cpt);
-            const m = createMomComponentContext(parent, cptFunction, props);
+            const cptFunction = props.$cpt;
+            props.$cpt = null as any;
+            const _props = observable(props);
+            const m = createMomComponentContext(parent, cptFunction, _props);
 
-            cptFunction(m, props);
+            cptFunction(m, _props);
             // TBD: try/catch ? or keep it like this?
 
             if (m.model === null) {
@@ -120,9 +128,9 @@ export const mom: Mom = {
 
             if (parent) {
                 if (!parent.childComponents) {
-                    parent.childComponents = new Set();
+                    parent.childComponents = new Map();
                 }
-                parent.childComponents.add(m);
+                parent.childComponents.set(m.model, m);
             }
             return m.model as unknown as RO<M>;
         }
@@ -147,7 +155,10 @@ export const mom: Mom = {
                         $ns: cptFunction.$ns,
                         $context: context,
                         $props: props,
-                        $actions: def.actions, // No need to wrap into mobx actions (cf. enforceActions comment)
+                        // No need to wrap into mobx actions (cf. enforceActions comment)
+                        ...("actions" in def ? { $actions: def.actions } : {}),
+                        $initialized: false,
+                        $disposed: false,
                         ...def.initialModel,
                     }) as unknown as M;
                     momCtxt.model = model;
@@ -155,11 +166,46 @@ export const mom: Mom = {
                     momCtxt.dispose = def.dispose;
                     return model;
                 },
-                mount<M extends MomModel>(cpt: { $cpt: MomComponent<M> } & M["$props"]): RO<M> {
-                    return loadCpt(momCtxt, cpt);
+                mount<M extends MomModel>(props: { $cpt: MomComponent<M> } & M["$props"]): RO<M> {
+                    return loadCpt(momCtxt, props);
+                },
+                unmount<M extends MomModel>(cpt: M | null): null {
+                    if (cpt) {
+                        disposeCpt(momCtxt, cpt as any);
+                    }
+                    return null;
                 },
             };
+            if (!rootCtxt) {
+                rootCtxt = momCtxt;
+            }
             return momCtxt;
+        }
+
+        function disposeCpt<M extends MomModel>(parent: MomComponentInternalContext<M>, c: M) {
+            const mi = parent.childComponents?.get(c);
+            if (mi) {
+                // remove from parent map
+                parent.childComponents!.delete(c);
+                disposeCtxt(mi);
+            }
+        }
+
+        function disposeCtxt(mi: MomComponentInternalContext<any>) {
+            const model = mi.model;
+            model.$initialized = false;
+            model.$initComplete = NEVER;
+
+            // call dispose
+            mi.dispose?.();
+
+            // call dispose on all child components
+            if (mi.childComponents) {
+                for (const c of mi.childComponents.values()) {
+                    disposeCpt(mi, c.model);
+                }
+            }
+            model.$disposed = true;
         }
     },
 };

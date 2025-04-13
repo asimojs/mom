@@ -38,7 +38,12 @@ describe("Mom mount+unmount", () => {
                             });
                         }
                     },
-                    deleteNext() {},
+                    deleteNext() {
+                        model.next = m.unmount(model.next);
+                    },
+                },
+                dispose() {
+                    props.value += "D";
                 },
             });
         });
@@ -68,13 +73,42 @@ describe("Mom mount+unmount", () => {
             // c.next = null; // not authorized: readonly
             expect(c.next?.$props.value).toBe("NEWVALUE");
         });
+
+        it("should dispose child components", async () => {
+            const a = mom.load({ $cpt: LinkedList, value: "A" }, options);
+            a.$actions.createNext("B");
+            const b = a.next!;
+            b.$actions.createNext("C");
+            const c = b.next!;
+            expect(c.$props.value).toBe("A+B+C");
+
+            a.$actions.deleteNext();
+            expect(a.next).toBe(null);
+            expect(a.$props.value).toBe("A");
+            expect(a.$initialized).toBe(true);
+            expect(a.$disposed).toBe(false);
+
+            expect(b.$disposed).toBe(true);
+            expect(b.$initialized).toBe(false);
+            expect(b.$props.value).toBe("A+BD");
+            expect(b.next).not.toBe(null);
+
+            expect(c.$disposed).toBe(true);
+            expect(c.$initialized).toBe(false);
+            expect(c.$props.value).toBe("A+B+CD");
+            expect(c.next).toBe(null);
+        });
     });
 
-    describe("Startup mount", () => {
+    describe("Startup mount child components", () => {
         interface TestCptModel extends MomModel {
             $props: {
                 depth: number;
             };
+            $actions: {
+                reset(): void;
+            };
+            msg: string;
             next: RO<TestCptModel> | null;
         }
 
@@ -82,12 +116,25 @@ describe("Mom mount+unmount", () => {
             const depth = props.depth;
             const model = m.createModel({
                 initialModel: {
+                    msg: "",
                     next: depth > 0 ? m.mount({ $cpt: TestCpt, depth: depth - 1 }) : null,
+                },
+                actions: {
+                    reset() {
+                        model.$props.depth = 0;
+                        model.next = m.unmount(model.next);
+                    },
+                },
+                init() {
+                    model.msg = "INITIALIZED";
+                },
+                dispose() {
+                    model.msg = "DISPOSED";
                 },
             });
         });
 
-        it("should mount child componentw", async () => {
+        it("should mount sub components", async () => {
             const c = mom.load({ $cpt: TestCpt, depth: 3 }, options);
 
             expect(c.next).not.toBe(null);
@@ -95,6 +142,35 @@ describe("Mom mount+unmount", () => {
             expect(c.next!.next!.next).not.toBe(null);
             expect(c.next!.next!.next!.$initialized).toBe(true);
             expect(c.next!.next!.next!.next).toBe(null);
+        });
+
+        it("should unmount components", async () => {
+            const c = mom.load({ $cpt: TestCpt, depth: 3 }, options);
+            const c1 = c.next!;
+            const c2 = c1.next!;
+            const c3 = c2.next!;
+
+            expect(c1.msg).toBe("INITIALIZED");
+            expect(c2.msg).toBe("INITIALIZED");
+            expect(c3.msg).toBe("INITIALIZED");
+
+            c.$actions.reset();
+            expect(c.next).toBe(null);
+            expect(c1.next).not.toBe(null);
+            expect(c2.next).not.toBe(null);
+            expect(c3.next).toBe(null);
+
+            expect(c1.$initialized).toBe(false);
+            expect(c2.$initialized).toBe(false);
+            expect(c3.$initialized).toBe(false);
+
+            expect(c1.$disposed).toBe(true);
+            expect(c2.$disposed).toBe(true);
+            expect(c3.$disposed).toBe(true);
+
+            expect(c1.msg).toBe("DISPOSED");
+            expect(c2.msg).toBe("DISPOSED");
+            expect(c3.msg).toBe("DISPOSED");
         });
     });
 });
