@@ -73,12 +73,12 @@ export const mom: Mom = {
                 "then" in initResult &&
                 typeof initResult.then === "function"
             ) {
-                mi.model!.$initialized = false;
+                mi.model!.$ready = false;
                 mi.model!.$initComplete = initResult.then(() => {
-                    mi.model!.$initialized = true;
+                    mi.model!.$ready = true;
                 });
             } else {
-                mi.model!.$initialized = true;
+                mi.model!.$ready = true;
                 mi.model!.$initComplete = DONE;
             }
             return m.model! as unknown as RO<ModelType>;
@@ -157,7 +157,7 @@ export const mom: Mom = {
                         $props: props,
                         // No need to wrap into mobx actions (cf. enforceActions comment)
                         ...("actions" in def ? { $actions: def.actions } : {}),
-                        $initialized: false,
+                        $ready: false,
                         $disposed: false,
                         ...def.initialModel,
                     }) as unknown as M;
@@ -193,8 +193,10 @@ export const mom: Mom = {
 
         function disposeCtxt(mi: MomComponentInternalContext<any>) {
             const model = mi.model;
-            model.$initialized = false;
+            model.$ready = false;
             model.$initComplete = NEVER;
+
+            // TODO: dispose computed values and autoRuns
 
             // call dispose
             mi.dispose?.();

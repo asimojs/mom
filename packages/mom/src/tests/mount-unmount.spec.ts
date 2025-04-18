@@ -55,7 +55,7 @@ describe("Mom mount+unmount", () => {
             expect(c.next).toBe(null);
 
             c.$actions.createNext("B");
-            expect(c.next?.$initialized).toBe(true);
+            expect(c.next?.$ready).toBe(true);
             expect(c.next?.$props.value).toBe("A+B");
 
             c.next!.$actions.createNext("C");
@@ -85,16 +85,16 @@ describe("Mom mount+unmount", () => {
             a.$actions.deleteNext();
             expect(a.next).toBe(null);
             expect(a.$props.value).toBe("A");
-            expect(a.$initialized).toBe(true);
+            expect(a.$ready).toBe(true);
             expect(a.$disposed).toBe(false);
 
             expect(b.$disposed).toBe(true);
-            expect(b.$initialized).toBe(false);
+            expect(b.$ready).toBe(false);
             expect(b.$props.value).toBe("A+BD");
             expect(b.next).not.toBe(null);
 
             expect(c.$disposed).toBe(true);
-            expect(c.$initialized).toBe(false);
+            expect(c.$ready).toBe(false);
             expect(c.$props.value).toBe("A+B+CD");
             expect(c.next).toBe(null);
         });
@@ -140,7 +140,7 @@ describe("Mom mount+unmount", () => {
             expect(c.next).not.toBe(null);
             expect(c.next!.next!).not.toBe(null);
             expect(c.next!.next!.next).not.toBe(null);
-            expect(c.next!.next!.next!.$initialized).toBe(true);
+            expect(c.next!.next!.next!.$ready).toBe(true);
             expect(c.next!.next!.next!.next).toBe(null);
         });
 
@@ -160,9 +160,9 @@ describe("Mom mount+unmount", () => {
             expect(c2.next).not.toBe(null);
             expect(c3.next).toBe(null);
 
-            expect(c1.$initialized).toBe(false);
-            expect(c2.$initialized).toBe(false);
-            expect(c3.$initialized).toBe(false);
+            expect(c1.$ready).toBe(false);
+            expect(c2.$ready).toBe(false);
+            expect(c3.$ready).toBe(false);
 
             expect(c1.$disposed).toBe(true);
             expect(c2.$disposed).toBe(true);

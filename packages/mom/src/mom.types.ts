@@ -75,7 +75,7 @@ export interface MomComponentContext<ModelType extends MomModel> {
      * Mount a child component that should be attached to the parent's model
      * This will:
      * - call the component init()
-     * - set and update the component.$initialized and component.$initiComplete properties
+     * - set and update the component.$ready and component.$initiComplete properties
      * e.g. model.myCpt = m.mount({$cpt: MyCpt, myprop:"hello"});
      **/
     mount<M extends MomModel>(props: { $cpt: MomComponent<M> } & M["$props"]): RO<M>;
@@ -83,7 +83,7 @@ export interface MomComponentContext<ModelType extends MomModel> {
      * Unmount a component - this will:
      * - recursively call the dispose methods of the component and child components
      * - set the component.$disposed to true
-     * - set the component.$initialized to false and change the component.$initComplete property
+     * - set the component.$ready to false and change the component.$initComplete property
      * Note: this will not automatically detach the component (i.e. set its parent reference to null)
      * This will have to be done manually - e.g.
      * model.myCpt = m.unmount(model.myCpt);
@@ -124,7 +124,7 @@ export type MomComponentDefinition<ModelType extends MomModel> = ModelType["$act
 
 export type MomInitialModelValues<ModelType> = Omit<
     ModelType,
-    "$ns" | "$props" | "$actions" | "$context" | "$initialized" | "$initComplete" | "$disposed"
+    "$ns" | "$props" | "$actions" | "$context" | "$ready" | "$initComplete" | "$disposed"
 >;
 
 /** Base model properties */
@@ -138,7 +138,7 @@ export interface MomModel<ModelProps extends object = {}, ModelActions = {}> {
     /** The component actions: the functions exposed to the component view(s) and the component parents */
     $actions: ModelActions;
     /** True when the initialization is complete (init may be asynchronous) and component is NOT disposed */
-    $initialized: boolean;
+    $ready: boolean;
     /** Promise resolving when initialization is complete and component is NOT disposed */
     $initComplete: Promise<void>;
     /** True when a component is disposed */

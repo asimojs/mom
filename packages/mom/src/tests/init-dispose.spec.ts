@@ -38,9 +38,9 @@ describe("Mom init+dispose", () => {
 
             expect(testA.$ns).toBe("");
             expect(testA.value).toBe("initial value + after createModel + after init");
-            expect(testA.$initialized).toBe(true);
+            expect(testA.$ready).toBe(true);
             await testA.$initComplete;
-            expect(testA.$initialized).toBe(true);
+            expect(testA.$ready).toBe(true);
             expect(testA.value).toBe("initial value + after createModel + after init"); // unchanged
         });
 
@@ -78,30 +78,30 @@ describe("Mom init+dispose", () => {
             const testB = mom.load({ $cpt: TestB }, { context });
 
             expect(testB.value).toBe("initial value + after createModel + init start");
-            expect(testB.$initialized).toBe(false);
+            expect(testB.$ready).toBe(false);
             expect(testB.$disposed).toBe(false);
             await testB.$initComplete;
-            expect(testB.$initialized).toBe(true);
+            expect(testB.$ready).toBe(true);
             expect(testB.$disposed).toBe(false);
             expect(testB.value).toBe("initial value + after createModel + init start + after init");
         });
 
         it("should dispose during init", async () => {
             const testB = mom.load({ $cpt: TestB }, { context });
-            expect(testB.$initialized).toBe(false);
+            expect(testB.$ready).toBe(false);
             testB.$dispose();
-            expect(testB.$initialized).toBe(false);
+            expect(testB.$ready).toBe(false);
             expect(testB.$disposed).toBe(true);
             expect(testB.value).toBe("initial value + after createModel + init start + after dispose");
         });
 
         it("should dispose after init", async () => {
             const testB = mom.load({ $cpt: TestB }, { context });
-            expect(testB.$initialized).toBe(false);
+            expect(testB.$ready).toBe(false);
             await testB.$initComplete;
-            expect(testB.$initialized).toBe(true);
+            expect(testB.$ready).toBe(true);
             testB.$dispose();
-            expect(testB.$initialized).toBe(false);
+            expect(testB.$ready).toBe(false);
             expect(testB.$disposed).toBe(true);
             expect(testB.value).toBe("initial value + after createModel + init start + after init + after dispose");
         });
