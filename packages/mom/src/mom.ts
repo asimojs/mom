@@ -193,6 +193,7 @@ export const mom: Mom = {
 
         function disposeCtxt(mi: MomComponentInternalContext<any>) {
             const model = mi.model;
+            if (model.$disposed) return;
             model.$ready = false;
             model.$initComplete = NEVER;
 
