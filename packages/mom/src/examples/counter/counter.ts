@@ -1,33 +1,24 @@
-import { mom } from "../../mom";
-import { CounterIID } from "./counter.types";
+import { storeFactory } from "@/mom";
+import { CounterSID } from "./counter.types";
 
-export const Counter = mom.component(CounterIID, (m, props) => {
-    if (!props.value) {
-        props.value = 0;
-    }
-    const initValue = props.value;
+export const CounterStore = storeFactory(CounterSID, (m, params) => {
+    const minFormatDigits = params.minFormatDigits ?? 2;
 
-    const model = m.createModel({
-        initialModel: {
-            nbrOfChanges: 0,
+    const model = m.makeAutoObservableModel({
+        $value: params.value ?? 0,
+        $resetValue: params.resetValue ?? 0,
+        get formattedValue() {
+            // Format the counter with padding "0" at the start - e.g. "03"
+            return String(model.$value).padStart(minFormatDigits, "0");
         },
-        actions: {
-            /** Increment the counter by the given quantity (can be negative) - default: 1 */
-            increment(quantity = 1) {
-                model.$actions.setValue(props.value! + quantity);
-            },
-            /** Set the counter to a specific value */
-            setValue(v: number) {
-                if (props.value !== v) {
-                    props.value = v;
-                    model.nbrOfChanges++;
-                    props.onChange?.(v);
-                }
-            },
-            /** Reset the counter to the initial value */
-            reset() {
-                model.$actions.setValue(initValue);
-            },
+
+        /** Increment the counter by the given quantity (can be negative) - default: 1 */
+        increment(quantity = 1) {
+            model.$value += quantity;
+        },
+        /** Reset the counter to the initial value */
+        reset() {
+            model.$value = model.$resetValue;
         },
     });
 });

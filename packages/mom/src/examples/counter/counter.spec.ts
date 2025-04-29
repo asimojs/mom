@@ -1,13 +1,11 @@
-import { mom } from "../../mom";
 import { beforeEach, describe, expect, it } from "vitest";
-import { Counter } from "./counter";
-import { CounterIID } from "./counter.types";
 import { asm, AsmContext } from "@asimojs/asimo";
-import { MomLoadOptions } from "@/mom.types";
+import { loadStore } from "@/mom";
+import { CounterStore } from "./counter";
+import { CounterSID } from "./counter.types";
 
 describe("Counter", () => {
     let context: AsmContext,
-        options: MomLoadOptions,
         onChangeValues: number[] = [];
 
     function onChange(v: number) {
@@ -17,91 +15,79 @@ describe("Counter", () => {
     beforeEach(() => {
         onChangeValues = [];
         context = asm.createChildContext("test:Counter");
-        options = {
-            context,
-        };
     });
-
-    // TODO: computed value with nbrOfDigits based on $props.value (reactivity on props)
 
     describe("Load", () => {
         it("should support value prop", async () => {
-            const counter = mom.load({ $cpt: Counter, value: 42 }, { context });
+            const counter = loadStore({ $store: CounterStore, value: 42, minFormatDigits: 3 });
 
-            expect(counter.$ns).toBe(CounterIID.ns);
-            expect(counter.$context.name).toBe("test:Counter");
-            expect(counter.$context.path).toBe("/asm/test:Counter");
-            expect(counter.$props.value).toBe(42);
-            expect(counter.$props.onChange).toBe(undefined);
-            expect(counter.nbrOfChanges).toBe(0);
+            expect(counter["#namespace"]).toBe(CounterSID.ns);
+            expect(counter["#namespace"]).toBe("mom.examples.counter");
+            expect(counter["#context"].name).toBe("asm"); // TODO
+            expect(counter["#context"].path).toBe("/asm"); // TODO: /asm/test:Counter
+            expect(counter.$value).toBe(42);
+            expect(counter.formattedValue).toBe("042");
+            expect(counter.$resetValue).toBe(0);
         });
 
-        it("should support no value prop", async () => {
-            const counter = mom.load({ $cpt: Counter });
+        it("should support no params", async () => {
+            const counter = loadStore({ $store: CounterStore });
 
-            expect(counter.$ns).toBe(CounterIID.ns);
-            expect(counter.$context.name).toBe("asm");
-            expect(counter.$context.path).toBe("/asm");
-            expect(counter.$props.value).toBe(0);
-            expect(counter.$props.onChange).toBe(undefined);
-            expect(counter.nbrOfChanges).toBe(0);
+            expect(counter["#namespace"]).toBe(CounterSID.ns);
+            expect(counter["#context"].name).toBe("asm");
+            expect(counter["#context"].path).toBe("/asm");
+            expect(counter.$value).toBe(0);
+            expect(counter.formattedValue).toBe("00");
         });
     });
 
     describe("Actions", () => {
         it("should increment or set the counter", async () => {
-            const counter = mom.load({ $cpt: Counter, value: 42, onChange }, options);
+            const counter = loadStore({ $store: CounterStore, value: 42 });
 
-            expect(onChangeValues).toEqual([]);
-            expect(counter.$props.value).toBe(42);
+            expect(counter.$value).toBe(42);
 
-            counter.$actions.increment();
-            expect(counter.$props.value).toBe(43);
-            expect(counter.nbrOfChanges).toBe(1);
-            expect(onChangeValues).toEqual([43]);
+            counter.increment();
+            expect(counter.$value).toBe(43);
 
             // counter.nbrOfChanges=2; // not possible -> nbrOfChanges is readonly
-            counter.$props.value = 9;
-            expect(counter.$props.value).toBe(9);
-            expect(counter.nbrOfChanges).toBe(1); // doesn't triger an onChange as direct update
-            expect(onChangeValues).toEqual([43]);
+            counter.$value = 9;
+            expect(counter.$value).toBe(9);
 
-            counter.$actions.increment(5);
-            expect(counter.$props.value).toBe(9 + 5);
-            expect(counter.nbrOfChanges).toBe(2);
-            expect(onChangeValues).toEqual([43, 14]);
+            counter.increment(5);
+            expect(counter.$value).toBe(9 + 5);
+            expect(counter.formattedValue).toBe("14");
 
-            counter.$actions.increment(-7);
-            expect(counter.$props.value).toBe(7);
-            expect(counter.nbrOfChanges).toBe(3);
-            expect(onChangeValues).toEqual([43, 14, 7]);
+            counter.increment(-7);
+            expect(counter.$value).toBe(7);
+            expect(counter.formattedValue).toBe("07");
 
-            counter.$actions.increment(0); // no changes
-            expect(counter.$props.value).toBe(7);
-            expect(counter.nbrOfChanges).toBe(3);
-            expect(onChangeValues).toEqual([43, 14, 7]);
+            counter.increment(0); // no changes
+            expect(counter.$value).toBe(7);
 
-            counter.$actions.setValue(-8); // value can be negative
-            expect(counter.$props.value).toBe(-8);
-            expect(counter.nbrOfChanges).toBe(4);
-            expect(onChangeValues).toEqual([43, 14, 7, -8]);
+            counter.$value = -8; // value can be negative
+            expect(counter.$value).toBe(-8);
         });
 
         it("reset the counter to its initial value", async () => {
-            const counter = mom.load({ $cpt: Counter, value: 3, onChange }, options);
+            const counter = loadStore({ $store: CounterStore, value: 3 });
 
             expect(onChangeValues).toEqual([]);
-            expect(counter.$props.value).toBe(3);
+            expect(counter.$value).toBe(3);
+            expect(counter.formattedValue).toBe("03");
 
-            counter.$actions.setValue(9);
-            expect(counter.$props.value).toBe(9);
-            expect(counter.nbrOfChanges).toBe(1);
-            expect(onChangeValues).toEqual([9]);
+            counter.$value = 9;
+            expect(counter.$value).toBe(9);
 
-            counter.$actions.reset();
-            expect(counter.$props.value).toBe(3);
-            expect(counter.nbrOfChanges).toBe(2);
-            expect(onChangeValues).toEqual([9, 3]);
+            expect(counter.$resetValue).toBe(0);
+            counter.reset();
+            expect(counter.$value).toBe(0);
+            expect(counter.formattedValue).toBe("00");
+
+            counter.$resetValue = 1;
+            counter.reset();
+            expect(counter.$value).toBe(1);
+            expect(counter.formattedValue).toBe("01");
         });
     });
 });

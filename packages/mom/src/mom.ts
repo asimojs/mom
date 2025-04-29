@@ -1,213 +1,270 @@
 import { InterfaceId } from "@asimojs/asimo/dist/asimo.types";
-import {
-    Mom,
-    MomComponent,
-    MomComponentDefinition,
-    MomComponentContext,
-    MomLoadOptions,
-    MomModel,
-    RO,
-    RootModel,
-} from "./mom.types";
-import { observable } from "mobx";
+import { StoreFactory, StoreContext, StoreDef, Store, StoreInternalController } from "./mom.types";
 import { asm } from "@asimojs/asimo";
-import { configure } from "mobx";
+import { makeAutoObservable } from "mobx";
 
-/** Mobx configuration */
-configure({
-    /**
-     * Observables genereated by mom are readonly outside the component function
-     * (except for props but this is the intended behavior)
-     * So typescript will prevent modifying model values outside the component.
-     * As such enforcing actions is not needed (on the good side it makes code much simpler)
-     **/
-    enforceActions: "never",
-});
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+/** Weak map of all root stores */
+const rootInternalContextByStores = new WeakMap<Store<any>, StoreInternalContext<any>>();
 
 /**
- * Enriched MomComponentContext with internal properties/methods
+ * Enriched StoreContext with internal properties/methods
  * that should not be visible to the component developer to limit confusion/errors
  */
-interface MomComponentInternalContext<ModelType extends MomModel> extends MomComponentContext<ModelType> {
-    parent: MomComponentInternalContext<any> | null;
-    childComponents: Map<MomModel, MomComponentInternalContext<any>> | null;
-    init?(): void | Promise<void>;
-    dispose?(): void;
+interface StoreInternalContext<SD extends StoreDef<any, any>> extends StoreContext<SD> {
+    store: Store<SD> | null;
+    parentCtxt: StoreInternalContext<any> | null;
+    childCtxts: Map<Store<any>, StoreInternalContext<any>> | null;
+    init: (() => void | Promise<void>) | null;
+    dispose: (() => void) | null;
+    resolveInit: (() => void) | null;
+    resolveDispose: (() => void) | null;
 }
 
-const DONE = Promise.resolve();
-const NEVER = new Promise<void>(() => {});
+/**
+ * Create a Store factory
+ * @param factory the store creation function
+ */
+export function storeFactory<SD extends StoreDef<object, object>>(
+    factory: (m: StoreContext<SD>, p: SD["params"]) => void,
+): StoreFactory<SD>;
+/**
+ * Create a Store factory associated to a Store Interface Id (aka. SID)
+ * @param storeSID the store interface id (creatred with storeIId())
+ * @param factory the store creation function
+ */
+export function storeFactory<SD extends StoreDef<object, object>>(
+    storeSID: InterfaceId<StoreFactory<SD>> | string,
+    factory: (m: StoreContext<SD>, p: SD["params"]) => void,
+): StoreFactory<SD>;
 
-export const mom: Mom = {
-    /**
-     * Define a mom component
-     * @param componentIID
-     * @param cf the component function
-     */
-    component<ModelType extends MomModel>(
-        componentIIDorCf:
-            | InterfaceId<MomComponent<ModelType>>
-            | ((m: MomComponentContext<ModelType>, props: ModelType["$props"]) => void),
-        cf?: (m: MomComponentContext<ModelType>, props: ModelType["$props"]) => void,
-    ): MomComponent<ModelType> {
-        let cptFn: (m: MomComponentContext<ModelType>, props: ModelType["$props"]) => void;
-        let componentIID: InterfaceId<MomComponent<ModelType>> | null = null;
-        let ns = "";
-        if (typeof componentIIDorCf === "function") {
-            cptFn = componentIIDorCf;
+export function storeFactory<SD extends StoreDef<object, object>>(
+    storeSIDorFactory: InterfaceId<StoreFactory<SD>> | string | ((m: StoreContext<SD>, p: SD["params"]) => void),
+    factory?: (m: StoreContext<SD>, p: SD["params"]) => void,
+): StoreFactory<SD> {
+    let storeSID: InterfaceId<StoreFactory<SD>> | null = null;
+    let ns = "";
+
+    if (typeof storeSIDorFactory === "function") {
+        factory = storeSIDorFactory as (m: StoreContext<SD>, p: SD["params"]) => void;
+    } else {
+        if (typeof storeSIDorFactory === "string") {
+            ns = storeSIDorFactory;
         } else {
-            ns = componentIIDorCf.ns;
-            if (cf === undefined) {
-                throw "";
+            storeSID = storeSIDorFactory;
+            ns = storeSIDorFactory.ns;
+        }
+    }
+
+    if (!factory) {
+        // TODO error
+        throw "Invalid Store Factory function";
+    }
+
+    function stFactory(m: StoreContext<SD>, params: SD["params"]): Store<SD> {
+        factory!(m, params); // TODO: try/catch
+        const mi = m as StoreInternalContext<SD>;
+        if (mi.init) {
+            try {
+                const initResult = mi.init!();
+                if (isPromise(initResult)) {
+                    initResult.then(() => {
+                        mi.resolveInit?.();
+                    });
+                } else {
+                    mi.resolveInit?.();
+                }
+            } catch (ex) {
+                // TODO
             }
-            cptFn = cf;
+        } else {
+            mi.resolveInit?.();
         }
 
-        function cpt(m: MomComponentContext<ModelType>, props: ModelType["$props"]): RO<ModelType> {
-            cptFn(m, props);
-            const mi = m as MomComponentInternalContext<ModelType>;
-            const initResult = mi.init?.();
-            if (
-                initResult &&
-                typeof initResult === "object" &&
-                "then" in initResult &&
-                typeof initResult.then === "function"
-            ) {
-                mi.model!.$ready = false;
-                mi.model!.$initComplete = initResult.then(() => {
-                    mi.model!.$ready = true;
+        return mi.store!;
+    }
+    (stFactory as unknown as Writeable<StoreFactory<SD>>)["#namespace"] = ns;
+    if (storeSID) {
+        asm.registerFactory(storeSID, () => stFactory as StoreFactory<SD>);
+    }
+    return stFactory as StoreFactory<SD>;
+}
+
+/**
+ * Load a root store.
+ * Note: if the store is a child of another store, then you should use
+ * m.mount() in the parent store instead
+ * @param params the store params
+ * @returns the store instance
+ */
+export function loadStore<SD extends StoreDef<object, object>>(
+    params: { $store: StoreFactory<SD> } & SD["params"],
+): Store<SD> {
+    const context = asm; // TODO: use context param or mom config
+
+    let rootCtxt: StoreInternalContext<any> | null = null;
+    const store = _loadStore(null, params);
+    (store as any).$dispose = () => {
+        if (rootCtxt) {
+            disposeCtxt(rootCtxt);
+        }
+    };
+    return store as Store<SD>;
+
+    function _loadStore(parent: StoreInternalContext<any> | null, params: { $store: StoreFactory<SD> } & SD["params"]) {
+        const stFactory = params.$store;
+        params.$store = null as any;
+
+        const mi = createStoreInternalContext(parent, stFactory, params);
+
+        stFactory(mi, params); // TODO: try/catch
+
+        if (mi.store === null) {
+            // TODO: MomError
+            throw `[${stFactory["#namespace"]}] Invalid Component function: m.createModel() was not called`;
+        }
+
+        if (parent) {
+            if (!parent.childCtxts) {
+                parent.childCtxts = new Map();
+            }
+            parent.childCtxts.set(mi.store, mi);
+        }
+
+        if (!parent) {
+            // this is a root store
+            rootInternalContextByStores.set(mi.store, mi);
+        }
+
+        return mi.store;
+    }
+
+    function createStoreInternalContext(
+        parent: StoreInternalContext<any> | null,
+        stFactory: StoreFactory<SD>,
+        params: SD["params"],
+    ): StoreInternalContext<SD> {
+        let createModelCalled = false;
+        const momCtxt: StoreInternalContext<SD> = {
+            parentCtxt: parent,
+            childCtxts: null,
+            context,
+            init: null,
+            dispose: null,
+            resolveInit: null,
+            resolveDispose: null,
+            store: null as Store<SD> | null,
+            makeAutoObservableModel(initialModel: SD["model"]): SD["model"] {
+                if (createModelCalled) {
+                    // TODO: MomError
+                    throw "Invalid Component function: m.createModel() must only be called once";
+                }
+                if (!initialModel) {
+                    // TODO: MomError
+                    throw "initialModel cannot be undefined";
+                }
+                const str = initialModel as Store<SD>;
+                const st: Writeable<Store<any>> = str;
+                st["#namespace"] = stFactory["#namespace"];
+                st["#context"] = parent?.context || asm;
+                st["#ready"] = false;
+                st["#state"] = "INITIALIZING";
+                st["#initComplete"] = new Promise((resolve) => {
+                    momCtxt.resolveInit = () => {
+                        st["#state"] = "READY";
+                        st["#ready"] = true;
+                        resolve();
+                    };
                 });
-            } else {
-                mi.model!.$ready = true;
-                mi.model!.$initComplete = DONE;
-            }
-            return m.model! as unknown as RO<ModelType>;
-        }
-        (cpt as MomComponent<ModelType>).$ns = ns;
-        if (componentIID) {
-            asm.registerFactory(componentIID, () => cpt as MomComponent<ModelType>);
-        }
+                st["#disposeComplete"] = new Promise((resolve) => {
+                    momCtxt.resolveDispose = () => {
+                        st["#state"] = "DISPOSED";
+                        st["#ready"] = false;
+                        resolve();
+                    };
+                });
 
-        return cpt as MomComponent<ModelType>;
-    },
-
-    /**
-     * Instantiate a mom component
-     * @returns a the component model (readonly except for $props)
-     */
-    load<ModelType extends MomModel>(
-        cpt: { $cpt: MomComponent<ModelType> } & ModelType["$props"],
-        options?: MomLoadOptions,
-    ): RootModel<ModelType> {
-        const context = options?.context || asm;
-
-        let rootCtxt: MomComponentInternalContext<any> | null = null;
-        const c = loadCpt(null, cpt);
-        (c as any).$dispose = () => {
-            if (rootCtxt) {
-                disposeCtxt(rootCtxt);
-            }
+                this.store = makeAutoObservable(initialModel) as Store<SD>;
+                return this.store!;
+            },
+            makeAutoObservableController<C extends StoreInternalController>(controller: C): C {
+                const ctl = makeAutoObservable(controller);
+                if (ctl.init) {
+                    this.init = ctl.init.bind(ctl);
+                }
+                if (ctl.dispose) {
+                    this.dispose = ctl.dispose.bind(ctl);
+                }
+                return ctl;
+            },
+            mount<SD extends StoreDef<any, any>>(params: { $store: StoreFactory<SD> } & SD["params"]): Store<SD> {
+                return _loadStore(momCtxt, params);
+            },
+            unmount(store: Store<any> | null): null {
+                if (store) {
+                    disposeStore(momCtxt, store as any);
+                }
+                return null;
+            },
+            terminate() {
+                disposeCtxt(this);
+            },
         };
-        return c as RootModel<ModelType>;
-
-        function loadCpt<M extends MomModel>(
-            parent: MomComponentInternalContext<any> | null,
-            props: { $cpt: MomComponent<M> } & M["$props"],
-        ) {
-            const cptFunction = props.$cpt;
-            props.$cpt = null as any;
-            const _props = observable(props);
-            const m = createMomComponentContext(parent, cptFunction, _props);
-
-            cptFunction(m, _props);
-            // TBD: try/catch ? or keep it like this?
-
-            if (m.model === null) {
-                throw `[${cptFunction.$ns}] Invalid Component function: m.createModel() was not called`;
-            }
-
-            if (parent) {
-                if (!parent.childComponents) {
-                    parent.childComponents = new Map();
-                }
-                parent.childComponents.set(m.model, m);
-            }
-            return m.model as unknown as RO<M>;
+        if (!rootCtxt) {
+            rootCtxt = momCtxt;
         }
+        return momCtxt;
+    }
 
-        function createMomComponentContext<M extends MomModel>(
-            parent: MomComponentInternalContext<any> | null,
-            cptFunction: MomComponent<M>,
-            props: M["$props"],
-        ): MomComponentInternalContext<M> {
-            let createModelCalled = false;
-            const momCtxt: MomComponentInternalContext<M> = {
-                parent,
-                childComponents: null,
-                context,
-                model: null as M | null,
-                createModel(def: MomComponentDefinition<M>): M {
-                    if (createModelCalled) {
-                        throw "Invalid Component function: m.createModel() must only be called once";
-                    }
-                    createModelCalled = true;
-                    const model = observable({
-                        $ns: cptFunction.$ns,
-                        $context: context,
-                        $props: props,
-                        // No need to wrap into mobx actions (cf. enforceActions comment)
-                        ...("actions" in def ? { $actions: def.actions } : {}),
-                        $ready: false,
-                        $disposed: false,
-                        ...def.initialModel,
-                    }) as unknown as M;
-                    momCtxt.model = model;
-                    momCtxt.init = def.init;
-                    momCtxt.dispose = def.dispose;
-                    return model;
-                },
-                mount<M extends MomModel>(props: { $cpt: MomComponent<M> } & M["$props"]): RO<M> {
-                    return loadCpt(momCtxt, props);
-                },
-                unmount<M extends MomModel>(cpt: M | null): null {
-                    if (cpt) {
-                        disposeCpt(momCtxt, cpt as any);
-                    }
-                    return null;
-                },
-            };
-            if (!rootCtxt) {
-                rootCtxt = momCtxt;
-            }
-            return momCtxt;
+    function disposeStore(parentCtxt: StoreInternalContext<any>, store: Store<any>) {
+        const mi = parentCtxt.childCtxts?.get(store);
+        if (mi) {
+            // remove from parent map
+            parentCtxt.childCtxts!.delete(store);
+            disposeCtxt(mi);
         }
+    }
 
-        function disposeCpt<M extends MomModel>(parent: MomComponentInternalContext<M>, c: M) {
-            const mi = parent.childComponents?.get(c);
-            if (mi) {
-                // remove from parent map
-                parent.childComponents!.delete(c);
-                disposeCtxt(mi);
+    function disposeCtxt(mi: StoreInternalContext<any>) {
+        const model = mi.store as Writeable<Store<any>> | null;
+        if (!model || model["#state"] === "DISPOSED" || model["#state"] === "DISPOSING") return;
+        model["#state"] = "DISPOSING";
+        model["#ready"] = false;
+
+        // TODO: dispose reactions
+
+        // call dispose
+        mi.dispose?.(); // TODO try/catch
+
+        // call dispose on all child components
+        if (mi.childCtxts) {
+            for (const c of mi.childCtxts.values()) {
+                disposeCtxt(c);
             }
+            mi.childCtxts = null;
         }
+        model.$disposed = true;
+        model["#state"] = "DISPOSED";
+        mi.resolveDispose?.();
+    }
+}
 
-        function disposeCtxt(mi: MomComponentInternalContext<any>) {
-            const model = mi.model;
-            model.$ready = false;
-            model.$initComplete = NEVER;
+/**
+ * Dispose a root store (created with loadStore).
+ * Note: child stores created with m.mount() should be disposed with m.unmount()
+ * @param store
+ * @returns true if the store was propertly disposed
+ */
+export function disposeStore<SD extends StoreDef<object, object>>(store: Store<SD>): boolean {
+    const mi = rootInternalContextByStores.get(store);
+    if (mi) {
+        mi.terminate?.();
+        rootInternalContextByStores.delete(store);
+        return true;
+    }
+    return false;
+}
 
-            // TODO: dispose computed values and autoRuns
-
-            // call dispose
-            mi.dispose?.();
-
-            // call dispose on all child components
-            if (mi.childComponents) {
-                for (const c of mi.childComponents.values()) {
-                    disposeCpt(mi, c.model);
-                }
-            }
-            model.$disposed = true;
-        }
-    },
-};
+function isPromise(p: any): p is Promise<unknown> {
+    return !!p && typeof p === "object" && typeof p.then === "function";
+}

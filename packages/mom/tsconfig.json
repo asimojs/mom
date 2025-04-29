@@ -1,13 +1,14 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "outDir": "./lib",
-    "esModuleInterop": true,
-    "lib": ["ESNext", "DOM"],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  "include": ["src/**/*"]
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./lib",
+        "esModuleInterop": true,
+        "isolatedModules": true,
+        "lib": ["ESNext", "DOM"],
+        "paths": {
+            "@/*": ["./src/*"]
+        }
+    },
+    "include": ["src/**/*", "../../misc"]
 }

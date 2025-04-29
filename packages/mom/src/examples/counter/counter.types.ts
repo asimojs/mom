@@ -1,23 +1,28 @@
-import { MomComponent, MomModel, interfaceId } from "../../mom.types";
+import { Store, storeIId } from "@/mom.types";
 
-export const CounterIID = interfaceId<MomComponent<CounterModel>>("mom.examples.counter");
+export type Counter = Store<CounterDef>;
+export const CounterSID = storeIId<CounterDef>("mom.examples.counter");
 
-/** Headless counter */
-export interface CounterModel extends MomModel {
-    $props: {
-        /** The counter value - default: 0 */
+/** Counter with init parameter + computed value + reset button */
+type CounterDef = {
+    params: {
+        /** The initial counter value - default: 0 */
         value?: number;
-        /** Change callback */
-        onChange?(v: number): void;
+        /** Minimal number of digits in the formatted display - default: 2 */
+        minFormatDigits?: number;
+        /** The value that should be used when the reset button is pressed - default: 0 */
+        resetValue?: number;
     };
-    $actions: {
+    model: {
+        /** The counter value - default: 0 */
+        $value: number;
+        /** The value that should be used when the reset button is pressed - default: params.resetValue */
+        $resetValue: number;
+        /** Counter value formatted according to minFormatDigits - e.g. "007" */
+        formattedValue: string;
         /** Increment the counter by the given quantity (can be negative) - default: 1 */
         increment(quantity?: number): void;
-        /** Set the counter to a specific value */
-        setValue(v: number): void;
-        /** Reset the counter to the initial value */
+        /** Reset the counter to $resetValue */
         reset(): void;
     };
-    /** The number of times actions (and onChange()) have been called */
-    nbrOfChanges: number;
-}
+};
