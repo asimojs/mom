@@ -64,23 +64,7 @@ export function storeFactory<SD extends StoreDef<object, object>>(
     function stFactory(m: StoreContext<SD>, params: SD["params"]): Store<SD> {
         factory!(m, params); // TODO: try/catch
         const mi = m as StoreInternalContext<SD>;
-        if (mi.init) {
-            try {
-                const initResult = mi.init!();
-                if (isPromise(initResult)) {
-                    initResult.then(() => {
-                        mi.resolveInit?.();
-                    });
-                } else {
-                    mi.resolveInit?.();
-                }
-            } catch (ex) {
-                // TODO
-            }
-        } else {
-            mi.resolveInit?.();
-        }
-
+        processLifeCycleFunction("INIT", mi);
         return mi.store!;
     }
     (stFactory as unknown as Writeable<StoreFactory<SD>>)["#namespace"] = ns;
@@ -233,9 +217,6 @@ export function loadStore<SD extends StoreDef<object, object>>(
 
         // TODO: dispose reactions
 
-        // call dispose
-        mi.dispose?.(); // TODO try/catch
-
         // call dispose on all child components
         if (mi.childCtxts) {
             for (const c of mi.childCtxts.values()) {
@@ -243,9 +224,8 @@ export function loadStore<SD extends StoreDef<object, object>>(
             }
             mi.childCtxts = null;
         }
-        model.$disposed = true;
-        model["#state"] = "DISPOSED";
-        mi.resolveDispose?.();
+
+        processLifeCycleFunction("DISPOSE", mi);
     }
 }
 
@@ -267,4 +247,26 @@ export function disposeStore<SD extends StoreDef<object, object>>(store: Store<S
 
 function isPromise(p: any): p is Promise<unknown> {
     return !!p && typeof p === "object" && typeof p.then === "function";
+}
+
+function processLifeCycleFunction(name: "INIT" | "DISPOSE", mi: StoreInternalContext<any>) {
+    const initOrDispose = name === "INIT" ? mi.init : mi.dispose;
+    const resolve = name === "INIT" ? mi.resolveInit : mi.resolveDispose;
+    if (initOrDispose) {
+        try {
+            const result = initOrDispose();
+            if (isPromise(result)) {
+                result.then(() => {
+                    resolve?.();
+                });
+            } else {
+                resolve?.();
+            }
+        } catch (ex) {
+            // TODO error
+            throw `Unexpected Store error during ${name}: ${ex}`;
+        }
+    } else {
+        resolve?.();
+    }
 }

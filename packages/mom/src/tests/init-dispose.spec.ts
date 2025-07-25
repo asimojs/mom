@@ -108,7 +108,7 @@ describe("Mom init+dispose", () => {
         // TODO: init with sub components
     });
 
-    describe("Async init", () => {
+    describe("Async init & dispose", () => {
         const TestStoreC = storeFactory<TestDef>((m) => {
             const model = m.makeAutoObservableModel({
                 value: "initial value",
@@ -121,8 +121,12 @@ describe("Mom init+dispose", () => {
                         model.value += " + after init";
                     });
                 },
-                dispose() {
-                    model.value += " + after dispose";
+                async dispose() {
+                    model.value += " + dispose start";
+                    await Promise.resolve();
+                    runInAction(() => {
+                        model.value += " + after dispose";
+                    });
                 },
             });
             model.value += " + after storeFactory";
@@ -147,8 +151,12 @@ describe("Mom init+dispose", () => {
             expect(store["#state"]).toBe("INITIALIZING");
             disposeStore(store);
             expect(store["#ready"]).toBe(false);
-            expect(store["#state"]).toBe("DISPOSED");
-            expect(store.value).toBe("initial value + after storeFactory + init start + after dispose");
+            expect(store["#state"]).toBe("DISPOSING");
+            expect(store.value).toBe("initial value + after storeFactory + init start + dispose start");
+            await store["#disposeComplete"];
+            expect(store.value).toBe(
+                "initial value + after storeFactory + init start + dispose start + after init + after dispose",
+            );
         });
 
         it("should dispose after init complete", async () => {
@@ -158,12 +166,16 @@ describe("Mom init+dispose", () => {
             expect(store["#ready"]).toBe(true);
             disposeStore(store);
             expect(store["#ready"]).toBe(false);
-            expect(store["#state"]).toBe("DISPOSED");
-            expect(store.value).toBe("initial value + after storeFactory + init start + after init + after dispose");
+            expect(store["#state"]).toBe("DISPOSING");
+            expect(store.value).toBe("initial value + after storeFactory + init start + after init + dispose start");
+            await store["#disposeComplete"];
+            expect(store.value).toBe(
+                "initial value + after storeFactory + init start + after init + dispose start + after dispose",
+            );
         });
     });
 
-    describe("Generator function init", () => {
+    describe("Generator function init & dispose", () => {
         const TestStoreC = storeFactory<TestDef>((m) => {
             const model = m.makeAutoObservableModel({
                 value: "initial value",
@@ -175,7 +187,10 @@ describe("Mom init+dispose", () => {
                     // no need for runInAction() here
                     model.value += " + after init";
                 },
-                dispose() {
+                *dispose() {
+                    model.value += " + dispose start";
+                    yield Promise.resolve();
+                    // no need for runInAction() here
                     model.value += " + after dispose";
                 },
             });
@@ -201,8 +216,12 @@ describe("Mom init+dispose", () => {
             expect(store["#state"]).toBe("INITIALIZING");
             disposeStore(store);
             expect(store["#ready"]).toBe(false);
-            expect(store["#state"]).toBe("DISPOSED");
-            expect(store.value).toBe("initial value + after storeFactory + init start + after dispose");
+            expect(store["#state"]).toBe("DISPOSING");
+            expect(store.value).toBe("initial value + after storeFactory + init start + dispose start");
+            await store["#disposeComplete"];
+            expect(store.value).toBe(
+                "initial value + after storeFactory + init start + dispose start + after init + after dispose",
+            );
         });
 
         it("should dispose after init complete", async () => {
@@ -210,10 +229,15 @@ describe("Mom init+dispose", () => {
             expect(store["#ready"]).toBe(false);
             await store["#initComplete"];
             expect(store["#ready"]).toBe(true);
+            expect(store["#state"]).toBe("READY");
             disposeStore(store);
             expect(store["#ready"]).toBe(false);
-            expect(store["#state"]).toBe("DISPOSED");
-            expect(store.value).toBe("initial value + after storeFactory + init start + after init + after dispose");
+            expect(store["#state"]).toBe("DISPOSING");
+            expect(store.value).toBe("initial value + after storeFactory + init start + after init + dispose start");
+            await store["#disposeComplete"];
+            expect(store.value).toBe(
+                "initial value + after storeFactory + init start + after init + dispose start + after dispose",
+            );
         });
     });
 });
