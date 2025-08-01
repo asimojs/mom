@@ -10,5 +10,6 @@
             "@/*": ["./src/*"]
         }
     },
-    "include": ["src/**/*", "../../misc"]
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "misc", "lib"]
 }

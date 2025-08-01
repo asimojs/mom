@@ -78,6 +78,14 @@ export interface StoreInternalController {
 }
 
 /**
+ * Default View props for a store React component
+ */
+export interface ViewProps<S extends Store<any>> {
+    store: S;
+    className?: string;
+}
+
+/**
  * The Store lifecycle state
  * - INITIALIZING: initialization has started and is not complete
  * - READY: the store is initialized (init complete)
