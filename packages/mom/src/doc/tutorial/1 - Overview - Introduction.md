@@ -7,7 +7,7 @@ This tutorial is going to drive through all mom features. It is split in 2 parts
 
 The goal of the tutorial is to let you know **how** to use mom - but also **why** mom is built this way.
 
-The tutorial is meant to address a large audience, from beginners in UI development to seasoned developers. The only requirement is to be familiar with Typescript.
+The tutorial is meant to address a large audience, from beginners in UI development to seasoned developers. The only requirement is to be familiar with Typescript (and to a lesser extent with React).
 
 Note: The more advanced parts are covered in **advanced sections** that can be skippped and kept for further reading (this is where the _why_ part of things are usually covered).
 
