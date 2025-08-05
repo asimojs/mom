@@ -54,8 +54,9 @@ Having said that, and to come back to the intial question: Stores correspond to 
 
 On top of that mom adds the following extras:
 
--   Easier management of large code base (HVMC)
--   Easier management of asynchronous initialization (cf. next)
--   AI friendly approach as code is very normative (mom)
+-   Support of large code base (HVMC) with progressive code load
+-   Possibility for parent stores to implement logic based on their child store models (this is technically possible with React but significantly more complicated)
+-   Easier management of asynchronous initialization
+-   AI friendly approach as code is very normative
 
 To be transparent, this comes at the cost of a more slightly verbose code base - but as we will see, this can be easily overcome with tooling, AI helpers or code snippets.
