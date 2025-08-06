@@ -90,7 +90,7 @@ export interface ViewProps<S extends Store<any>> {
  * - INITIALIZING: initialization has started and is not complete
  * - READY: the store is initialized (init complete)
  * - DISPOSING: the store is being disposed and disposal is not complete
- * - DISOPOSED: the store is disposed and will not function anymore. Store references should be removed (remaining data can be read though)
+ * - DISPOSED: the store is disposed and will not function anymore. Store references should be removed (remaining data can be read though)
  */
 type StoreState = "INITIALIZING" | "READY" | "DISPOSING" | "DISPOSED";
 
