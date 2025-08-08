@@ -81,13 +81,13 @@ export function storeFactory<SD extends StoreDef<object, object>>(
  * @param params the store params
  * @returns the store instance
  */
-export function loadStore<SD extends StoreDef<object, object>>(
+export function createStore<SD extends StoreDef<object, object>>(
     params: { $store: StoreFactory<SD> } & SD["params"],
 ): Store<SD> {
     const context = asm; // TODO: use context param or mom config
 
     let rootCtxt: StoreInternalContext<any> | null = null;
-    const store = _loadStore(null, params);
+    const store = _createStore(null, params);
     (store as any).$dispose = () => {
         if (rootCtxt) {
             disposeCtxt(rootCtxt);
@@ -95,7 +95,10 @@ export function loadStore<SD extends StoreDef<object, object>>(
     };
     return store as Store<SD>;
 
-    function _loadStore(parent: StoreInternalContext<any> | null, params: { $store: StoreFactory<SD> } & SD["params"]) {
+    function _createStore(
+        parent: StoreInternalContext<any> | null,
+        params: { $store: StoreFactory<SD> } & SD["params"],
+    ) {
         const stFactory = params.$store;
         params.$store = null as any;
 
@@ -182,7 +185,7 @@ export function loadStore<SD extends StoreDef<object, object>>(
                 return ctl;
             },
             mount<SD extends StoreDef<any, any>>(params: { $store: StoreFactory<SD> } & SD["params"]): Store<SD> {
-                return _loadStore(momCtxt, params);
+                return _createStore(momCtxt, params);
             },
             unmount(store: Store<any> | null): null {
                 if (store) {
@@ -230,7 +233,7 @@ export function loadStore<SD extends StoreDef<object, object>>(
 }
 
 /**
- * Dispose a root store (created with loadStore).
+ * Dispose a root store (created with createStore).
  * Note: child stores created with m.mount() should be disposed with m.unmount()
  * @param store
  * @returns true if the store was propertly disposed

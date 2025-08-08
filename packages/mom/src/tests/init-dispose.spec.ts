@@ -1,4 +1,4 @@
-import { disposeStore, loadStore, storeFactory } from "../mom";
+import { disposeStore, createStore, storeFactory } from "../mom";
 import { describe, expect, it } from "vitest";
 import { runInAction } from "mobx";
 
@@ -35,7 +35,7 @@ describe("Mom init+dispose", () => {
 
         it("should set the store ready if no init", async () => {
             let initCompleteCount = 0;
-            const store = loadStore({ $store: TestStoreA });
+            const store = createStore({ $store: TestStoreA });
             store["#initComplete"].then(() => {
                 initCompleteCount++;
             });
@@ -52,7 +52,7 @@ describe("Mom init+dispose", () => {
 
         it("should call init immediately after load", async () => {
             let initCompleteCount = 0;
-            const store = loadStore({ $store: TestStoreB });
+            const store = createStore({ $store: TestStoreB });
             store["#initComplete"].then(() => {
                 initCompleteCount++;
             });
@@ -70,7 +70,7 @@ describe("Mom init+dispose", () => {
 
         it("should dispose stores with no explicit dispose methods", async () => {
             let diposeCompleteCount = 0;
-            const store = loadStore({ $store: TestStoreA });
+            const store = createStore({ $store: TestStoreA });
             expect(store.value).toBe("initial value + after storeFactory");
             store["#disposeComplete"].then(() => {
                 diposeCompleteCount++;
@@ -88,7 +88,7 @@ describe("Mom init+dispose", () => {
 
         it("should dispose stores with explicit dispose methods", async () => {
             let diposeCompleteCount = 0;
-            const store = loadStore({ $store: TestStoreB });
+            const store = createStore({ $store: TestStoreB });
             expect(store.value).toBe("initial value + after storeFactory + after init");
             store["#disposeComplete"].then(() => {
                 diposeCompleteCount++;
@@ -133,7 +133,7 @@ describe("Mom init+dispose", () => {
         });
 
         it("should handle #initComplete", async () => {
-            const store = loadStore({ $store: TestStoreC });
+            const store = createStore({ $store: TestStoreC });
 
             expect(store.value).toBe("initial value + after storeFactory + init start");
             expect(store["#ready"]).toBe(false);
@@ -145,7 +145,7 @@ describe("Mom init+dispose", () => {
         });
 
         it("should support terminate during init", async () => {
-            const store = loadStore({ $store: TestStoreC });
+            const store = createStore({ $store: TestStoreC });
 
             expect(store["#ready"]).toBe(false);
             expect(store["#state"]).toBe("INITIALIZING");
@@ -160,7 +160,7 @@ describe("Mom init+dispose", () => {
         });
 
         it("should dispose after init complete", async () => {
-            const store = loadStore({ $store: TestStoreC });
+            const store = createStore({ $store: TestStoreC });
             expect(store["#ready"]).toBe(false);
             await store["#initComplete"];
             expect(store["#ready"]).toBe(true);
@@ -198,7 +198,7 @@ describe("Mom init+dispose", () => {
         });
 
         it("should handle #initComplete", async () => {
-            const store = loadStore({ $store: TestStoreC });
+            const store = createStore({ $store: TestStoreC });
 
             expect(store.value).toBe("initial value + after storeFactory + init start");
             expect(store["#ready"]).toBe(false);
@@ -210,7 +210,7 @@ describe("Mom init+dispose", () => {
         });
 
         it("should support terminate during init", async () => {
-            const store = loadStore({ $store: TestStoreC });
+            const store = createStore({ $store: TestStoreC });
 
             expect(store["#ready"]).toBe(false);
             expect(store["#state"]).toBe("INITIALIZING");
@@ -225,7 +225,7 @@ describe("Mom init+dispose", () => {
         });
 
         it("should dispose after init complete", async () => {
-            const store = loadStore({ $store: TestStoreC });
+            const store = createStore({ $store: TestStoreC });
             expect(store["#ready"]).toBe(false);
             await store["#initComplete"];
             expect(store["#ready"]).toBe(true);

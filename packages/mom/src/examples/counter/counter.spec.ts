@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { asm, AsmContext } from "@asimojs/asimo";
-import { loadStore } from "@/mom";
+import { createStore } from "@/mom";
 import { CounterStore } from "./counter";
 import { CounterSID } from "./counter.types";
 
@@ -19,7 +19,7 @@ describe("Counter", () => {
 
     describe("Load", () => {
         it("should support value prop", async () => {
-            const counter = loadStore({ $store: CounterStore, value: 42, minFormatDigits: 3 });
+            const counter = createStore({ $store: CounterStore, value: 42, minFormatDigits: 3 });
 
             expect(counter["#namespace"]).toBe(CounterSID.ns);
             expect(counter["#namespace"]).toBe("mom.examples.counter");
@@ -30,7 +30,7 @@ describe("Counter", () => {
         });
 
         it("should support no params", async () => {
-            const counter = loadStore({ $store: CounterStore });
+            const counter = createStore({ $store: CounterStore });
 
             expect(counter["#namespace"]).toBe(CounterSID.ns);
             expect(counter["#context"].name).toBe("asm");
@@ -42,7 +42,7 @@ describe("Counter", () => {
 
     describe("Actions", () => {
         it("should increment or set the counter", async () => {
-            const counter = loadStore({ $store: CounterStore, value: 42 });
+            const counter = createStore({ $store: CounterStore, value: 42 });
 
             expect(counter.value).toBe(42);
 
@@ -62,7 +62,7 @@ describe("Counter", () => {
         });
 
         it("reset the counter", async () => {
-            const counter = loadStore({ $store: CounterStore, value: 3 });
+            const counter = createStore({ $store: CounterStore, value: 3 });
 
             expect(onChangeValues).toEqual([]);
             expect(counter.value).toBe(3);
