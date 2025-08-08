@@ -59,4 +59,4 @@ On top of that mom adds the following extras:
 -   Easier management of asynchronous initialization
 -   AI friendly approach as code is very normative
 
-To be transparent, this comes at the cost of a more slightly verbose code base - but as we will see, this can be easily overcome with tooling, AI helpers or code snippets.
+To be transparent, this comes at the cost of a slightly more verbose code base - but as we will see, this can be easily overcome with tooling, AI helpers or code snippets.
