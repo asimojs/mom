@@ -1,6 +1,6 @@
 import { storeFactory } from "@/mom";
 import { CountDownSID } from "./countdown.types";
-import { observable, runInAction } from "mobx";
+import { runInAction } from "mobx";
 
 // section#main
 export const CountDownStore = storeFactory(CountDownSID, (m, params) => {

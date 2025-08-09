@@ -7,15 +7,9 @@ import { CountDown } from "./countdown.types";
 
 describe("CountDown", () => {
     let context: AsmContext,
-        onChangeValues: number[] = [],
         store: CountDown | null = null;
 
-    function onChange(v: number) {
-        onChangeValues.push(v);
-    }
-
     beforeEach(() => {
-        onChangeValues = [];
         context = asm.createChildContext("test:CountDown");
     });
 

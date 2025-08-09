@@ -3,6 +3,9 @@ import { StoreFactory, StoreContext, StoreDef, Store, StoreInternalController } 
 import { asm } from "@asimojs/asimo";
 import { makeAutoObservable } from "mobx";
 
+/** Store counter to generate unique ids */
+let storeCount = 0;
+
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 /** Weak map of all root stores */
 const rootInternalContextByStores = new WeakMap<Store<any>, StoreInternalContext<any>>();
@@ -152,7 +155,9 @@ export function createStore<SD extends StoreDef<object, object>>(
                 }
                 const str = initialModel as Store<SD>;
                 const st: Writeable<Store<any>> = str;
-                st["#namespace"] = stFactory["#namespace"];
+                const ns = stFactory["#namespace"];
+                st["#namespace"] = ns;
+                st["#id"] = `${ns}#${++storeCount}`;
                 st["#context"] = parent?.context || asm;
                 st["#ready"] = false;
                 st["#state"] = "INITIALIZING";
@@ -160,14 +165,14 @@ export function createStore<SD extends StoreDef<object, object>>(
                     momCtxt.resolveInit = () => {
                         st["#state"] = "READY";
                         st["#ready"] = true;
-                        resolve();
+                        resolve(undefined);
                     };
                 });
                 st["#disposeComplete"] = new Promise((resolve) => {
                     momCtxt.resolveDispose = () => {
                         st["#state"] = "DISPOSED";
                         st["#ready"] = false;
-                        resolve();
+                        resolve(undefined);
                     };
                 });
 

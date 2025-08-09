@@ -49,6 +49,8 @@ describe("Mom mount+unmount", () => {
             expect(store.next?.["#ready"]).toBe(true);
             expect(store.next?.$value).toBe("A+B");
 
+            expect(store["#id"]).not.toBe(store.next!["#id"]);
+
             store.next!.createNext("C");
             expect(store.next!.next!.$value).toBe("A+B+C");
             expect(store.next!.next!.next).toBe(null);

@@ -31,6 +31,12 @@ export interface StoreContext<D extends StoreDef<any, any>> {
      **/
     context: AsmContext;
     /**
+     * The store associated to this context.
+     * Note: the store is only defined after makeAutoObservableModel() has been called - null
+     * will be returned if the property is ready before
+     */
+    store: Store<D> | null;
+    /**
      * Create the Mobx Observable object that will be used as store model.
      * This method is a simple (typed) wrapper on the mobx makeAutoObservable function -
      * so all mobx features can be used here.
@@ -81,7 +87,7 @@ export interface StoreInternalController {
  * Default View props for a store React component
  */
 export interface ViewProps<S extends Store<any>> {
-    store: S;
+    store: ReadOnlyExceptSingleDollar<S>;
     className?: string;
 }
 
@@ -100,6 +106,12 @@ type StoreState = "INITIALIZING" | "READY" | "DISPOSING" | "DISPOSED";
 export interface StoreMetaData {
     /** The store namespace */
     readonly "#namespace": string;
+    /**
+     * A unique id associated to the store - composed from the concatenation of the namespace with a unique number,
+     * separated with a #
+     * @example "mom.example.counter#3"
+     */
+    readonly "#id": string;
     /** The context associated to the store - allows to share or retrieve dependencies */
     readonly "#context": AsmContext;
     /** The store life cycle state from INITIALIZING to DISPOSED */
@@ -113,7 +125,7 @@ export interface StoreMetaData {
 }
 
 /** Define a Mom Model from its Params and State */
-export type Store<D extends StoreDef<any, any>> = ReadOnlyExceptSingleDollar<D["model"]> & StoreMetaData;
+export type Store<D extends StoreDef<any, any>> = ReadOnlyExceptSingleDollar<D["model"] & StoreMetaData>;
 
 /** Store definition type */
 export type StoreDef<Params extends object = {}, Model extends object = {}> = {

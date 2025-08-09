@@ -23,6 +23,7 @@ describe("Counter", () => {
 
             expect(counter["#namespace"]).toBe(CounterSID.ns);
             expect(counter["#namespace"]).toBe("mom.examples.counter");
+            expect(counter["#id"].match(/^mom\.examples\.counter\#(\d+)$/)?.[1]).not.toBeUndefined();
             expect(counter["#context"].name).toBe("asm"); // TODO
             expect(counter["#context"].path).toBe("/asm"); // TODO: /asm/test:Counter
             expect(counter.value).toBe(42);
