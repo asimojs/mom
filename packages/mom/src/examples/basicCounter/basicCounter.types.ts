@@ -10,5 +10,5 @@ type BasicCounterDef = {
     };
 };
 
-export type BasicCounter = Store<BasicCounterDef>;
+export type BasicCounterStore = Store<BasicCounterDef>;
 export const BasicCounterSID = storeIId<BasicCounterDef>("mom.examples.basicCounter");

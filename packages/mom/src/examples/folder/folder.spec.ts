@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { asm, AsmContext } from "@asimojs/asimo";
 import { disposeStore, createStore } from "@/mom";
-import { FolderStore } from "./folder";
-import { Folder, FolderData } from "./folder.types";
+import { Folder } from "./folder";
+import { FolderStore, FolderData } from "./folder.types";
 
 describe("Folder", () => {
     let context: AsmContext,
-        store: Folder | null = null;
+        store: FolderStore | null = null;
 
     beforeEach(() => {
         context = asm.createChildContext("test:Folder");
@@ -33,7 +33,7 @@ describe("Folder", () => {
 
     describe("Load", () => {
         it("should support empty root stores", async () => {
-            store = createStore({ $store: FolderStore, data: {}, parent: null });
+            store = createStore({ $store: Folder, data: {}, parent: null });
             expect(store["#ready"]).toBe(true);
             expect(store.isExpanded).toBe(false);
             expect(store.name).toBe("[Unnamed folder]");
@@ -43,7 +43,7 @@ describe("Folder", () => {
         });
 
         it("should load sub-store on-demand (init:collapsed)", async () => {
-            store = createStore({ $store: FolderStore, data: Data1, parent: null, expanded: false });
+            store = createStore({ $store: Folder, data: Data1, parent: null, expanded: false });
             expect(store.isExpanded).toBe(false);
             expect(store.name).toBe("root");
             expect(store.path).toBe("/");
@@ -69,7 +69,7 @@ describe("Folder", () => {
         });
 
         it("should load sub-store on-demand (init:expanded)", async () => {
-            store = createStore({ $store: FolderStore, data: Data1, parent: null, expanded: true });
+            store = createStore({ $store: Folder, data: Data1, parent: null, expanded: true });
             expect(store.isExpanded).toBe(true);
             expect(store.name).toBe("root");
             expect(store.path).toBe("/");
@@ -94,7 +94,7 @@ describe("Folder", () => {
 
     describe("Actions", () => {
         it("should support expand all", async () => {
-            store = createStore({ $store: FolderStore, data: Data1, parent: null, expanded: false });
+            store = createStore({ $store: Folder, data: Data1, parent: null, expanded: false });
             store.expandAll(true);
             expect(store.isExpanded).toBe(true);
             expect(store.folders[0].isExpanded).toBe(true);
@@ -105,7 +105,7 @@ describe("Folder", () => {
         });
 
         it("should support collapse all", async () => {
-            store = createStore({ $store: FolderStore, data: Data1, parent: null, expanded: false });
+            store = createStore({ $store: Folder, data: Data1, parent: null, expanded: false });
             store.expandAll(true);
             store.expandAll(false);
             expect(store.isExpanded).toBe(false);
@@ -117,7 +117,7 @@ describe("Folder", () => {
         });
 
         it("should reflect name changes in the folder path", async () => {
-            store = createStore({ $store: FolderStore, data: Data1, parent: null, expanded: false });
+            store = createStore({ $store: Folder, data: Data1, parent: null, expanded: false });
             store.expandAll(true);
             const f0 = store.folders[0];
             const f01 = f0.folders[1];

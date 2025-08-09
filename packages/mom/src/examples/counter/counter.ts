@@ -2,7 +2,7 @@ import { storeFactory } from "@/mom";
 import { CounterSID } from "./counter.types";
 
 // section#main
-export const CounterStore = storeFactory(CounterSID, (m, params) => {
+export const Counter = storeFactory(CounterSID, (m, params) => {
     const minFormatDigits = params.minFormatDigits ?? 2;
 
     const model = m.makeAutoObservableModel({

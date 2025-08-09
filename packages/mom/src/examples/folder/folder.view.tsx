@@ -1,9 +1,9 @@
 import { observer } from "mobx-react-lite";
-import { Folder } from "./folder.types";
+import { FolderStore } from "./folder.types";
 import { ViewProps } from "@/mom.types";
 
 // section#main
-export const FolderView = observer(({ store, className }: ViewProps<Folder>) => {
+export const FolderView = observer(({ store, className }: ViewProps<FolderStore>) => {
     return (
         <div className={className}>
             <div>

@@ -26,5 +26,5 @@ type CountDownDef = {
 };
 // /section#main
 
-export type CountDown = Store<CountDownDef>;
+export type CountDownStore = Store<CountDownDef>;
 export const CountDownSID = storeIId<CountDownDef>("mom.examples.countdown");

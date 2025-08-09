@@ -6,7 +6,7 @@ type FolderDef = {
         /** The folder data retrieved from the domain layer */
         data: FolderData;
         /** The parent folder or null for the root folder */
-        parent: Folder | null;
+        parent: FolderStore | null;
         /** Tell if the folder should be expanded */
         expanded?: boolean;
     };
@@ -20,7 +20,7 @@ type FolderDef = {
         /** The files contained in this folder */
         files: string[];
         /** The sub-folders contained in this folder */
-        folders: Folder[];
+        folders: FolderStore[];
 
         /** Change the expand value */
         expand(expanded: boolean): void;
@@ -40,5 +40,5 @@ export interface FolderData {
 }
 // /section#folderdata
 
-export type Folder = Store<FolderDef>;
+export type FolderStore = Store<FolderDef>;
 export const FolderSID = storeIId<FolderDef>("mom.examples.Folder");

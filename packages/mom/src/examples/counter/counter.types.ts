@@ -21,5 +21,5 @@ type CounterDef = {
 };
 // /section#main
 
-export type Counter = Store<CounterDef>;
+export type CounterStore = Store<CounterDef>;
 export const CounterSID = storeIId<CounterDef>("mom.examples.counter");

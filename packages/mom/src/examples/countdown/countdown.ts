@@ -3,7 +3,7 @@ import { CountDownSID } from "./countdown.types";
 import { runInAction } from "mobx";
 
 // section#main
-export const CountDownStore = storeFactory(CountDownSID, (m, params) => {
+export const CountDown = storeFactory(CountDownSID, (m, params) => {
     const { initValue = 10, intervalMs = 1000, autoStart = false } = params;
 
     const model = m.makeAutoObservableModel({

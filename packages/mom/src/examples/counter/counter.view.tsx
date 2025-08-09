@@ -1,9 +1,9 @@
 import { observer } from "mobx-react-lite";
-import { Counter } from "./counter.types";
+import { CounterStore } from "./counter.types";
 import { ViewProps } from "@/mom.types";
 
 // section#main
-export const CounterView = observer(({ store, className }: ViewProps<Counter>) => {
+export const CounterView = observer(({ store, className }: ViewProps<CounterStore>) => {
     return (
         <div className={className}>
             <div>Counter: {store.formattedValue}</div>

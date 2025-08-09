@@ -2,7 +2,7 @@ import { storeFactory } from "@/mom";
 import { FolderSID } from "./folder.types";
 
 // section#main
-export const FolderStore = storeFactory(FolderSID, (m, params) => {
+export const Folder = storeFactory(FolderSID, (m, params) => {
     const { data, parent, expanded = false } = params;
     let defaultChildExpanded = false;
 
@@ -49,7 +49,7 @@ export const FolderStore = storeFactory(FolderSID, (m, params) => {
                     model.folders.push(
                         // m.mount returns a new FolderStore instance
                         m.mount({
-                            $store: FolderStore,
+                            $store: Folder,
                             data: dataFolder,
                             parent: m.store,
                             expanded: defaultChildExpanded,

@@ -1,8 +1,5 @@
 import { Store, storeIId } from "@/mom.types";
-import { Counter } from "../counter/counter.types";
-
-export type CounterList = Store<CounterListDef>;
-export const CounterListSID = storeIId<CounterListDef>("mom.examples.counterList");
+import { CounterStore } from "../counter/counter.types";
 
 /** Store exposing a list of counters */
 type CounterListDef = {
@@ -18,13 +15,16 @@ type CounterListDef = {
         /** The value used when creating a new counter - can be changed dynamically */
         $defaultValue: number;
         /** The list of counters */
-        counters: Counter[];
+        counters: CounterStore[];
 
         /** Add a new counter to the list */
         addCounter(): void;
         /** Remove a counter */
-        removeCounter(c: Counter): void;
+        removeCounter(c: CounterStore): void;
         /** Reset all counters to their initial value */
         reset(): void;
     };
 };
+
+export type CounterListStore = Store<CounterListDef>;
+export const CounterListSID = storeIId<CounterListDef>("mom.examples.counterList");
