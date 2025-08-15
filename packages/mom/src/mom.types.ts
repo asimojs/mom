@@ -1,5 +1,6 @@
 import { AsmContext, InterfaceId, InterfaceNamespace } from "@asimojs/asimo/dist/asimo.types";
 import { interfaceId as _interfaceId } from "@asimojs/asimo";
+import { IAutorunOptions, IReactionDisposer, IReactionOptions, IReactionPublic } from "mobx";
 
 /** Create an interface identifier */
 export const interfaceId = _interfaceId;
@@ -42,7 +43,7 @@ export interface StoreContext<D extends StoreDef<any, any>> {
      * so all mobx features can be used here.
      * @see https://mobx.js.org/observable-state.html#makeautoobservable
      **/
-    makeAutoObservableModel(initialModel: D["model"]): D["model"];
+    makeAutoObservableModel(initialModel: D["model"] & { [key: `_${string}`]: any }): D["model"];
     /**
      * Create internal actions and observable state values that will not be exposed to the store users.
      * The store init() and dispose() methods should be defined here.
@@ -76,6 +77,20 @@ export interface StoreContext<D extends StoreDef<any, any>> {
      * Trigger the store disposal
      */
     terminate(): void;
+    /**
+     * Wrapper on mobx' autorun to ensure that the reaction is automatically diposed with the store
+     * By default a unique name associated to the store #id will be added to the options
+     * The error will be also redirected to the mom logger
+     * @param effect the effect function
+     * @param options
+     */
+    autorun(effect: (r: IReactionPublic) => any, options?: IAutorunOptions): IReactionDisposer;
+
+    reaction<T, FireImmediately extends boolean = true>(
+        expression: (r: IReactionPublic) => T,
+        effect: (arg: T, prev: FireImmediately extends true ? T | undefined : T, r: IReactionPublic) => void,
+        options?: IReactionOptions<T, FireImmediately>,
+    ): IReactionDisposer;
 }
 
 export interface StoreInternalController {

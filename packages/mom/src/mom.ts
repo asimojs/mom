@@ -1,7 +1,16 @@
 import { InterfaceId } from "@asimojs/asimo/dist/asimo.types";
 import { StoreFactory, StoreContext, StoreDef, Store, StoreInternalController } from "./mom.types";
 import { asm } from "@asimojs/asimo";
-import { makeAutoObservable } from "mobx";
+import {
+    autorun,
+    IReactionDisposer,
+    IReactionPublic,
+    IAutorunOptions,
+    IReactionOptions,
+    makeAutoObservable,
+    reaction,
+    runInAction,
+} from "mobx";
 
 /** Store counter to generate unique ids */
 let storeCount = 0;
@@ -18,6 +27,7 @@ interface StoreInternalContext<SD extends StoreDef<any, any>> extends StoreConte
     store: Store<SD> | null;
     parentCtxt: StoreInternalContext<any> | null;
     childCtxts: Map<Store<any>, StoreInternalContext<any>> | null;
+    reactionDisposers: IReactionDisposer[] | null;
     init: (() => void | Promise<void>) | null;
     dispose: (() => void) | null;
     resolveInit: (() => void) | null;
@@ -135,6 +145,9 @@ export function createStore<SD extends StoreDef<object, object>>(
         params: SD["params"],
     ): StoreInternalContext<SD> {
         let createModelCalled = false;
+        let autoRunCount = 0;
+        let reactionCount = 0;
+
         const momCtxt: StoreInternalContext<SD> = {
             parentCtxt: parent,
             childCtxts: null,
@@ -144,6 +157,7 @@ export function createStore<SD extends StoreDef<object, object>>(
             resolveInit: null,
             resolveDispose: null,
             store: null as Store<SD> | null,
+            reactionDisposers: null,
             makeAutoObservableModel(initialModel: SD["model"]): SD["model"] {
                 if (createModelCalled) {
                     // TODO: MomError
@@ -201,11 +215,61 @@ export function createStore<SD extends StoreDef<object, object>>(
             terminate() {
                 disposeCtxt(this);
             },
+            autorun(effect: (r: IReactionPublic) => any, options: IAutorunOptions = {}) {
+                setReactionOptions(this, "autorun", options);
+                const disposer = autorun(effect, options);
+                reactionDisposers(this).push(disposer);
+                return disposer;
+            },
+            reaction<T, FireImmediately extends boolean = true>(
+                expression: (r: IReactionPublic) => T,
+                effect: (arg: T, prev: FireImmediately extends true ? T | undefined : T, r: IReactionPublic) => void,
+                options: IReactionOptions<T, FireImmediately> = {},
+            ): IReactionDisposer {
+                setReactionOptions(this, "reaction", options);
+                const disposer = reaction(
+                    expression,
+                    (arg, prev, r) => runInAction(() => effect(arg, prev, r)),
+                    options,
+                );
+                reactionDisposers(this).push(disposer);
+                return disposer;
+            },
         };
         if (!rootCtxt) {
             rootCtxt = momCtxt;
         }
         return momCtxt;
+
+        function setReactionOptions(
+            mi: StoreInternalContext<SD>,
+            scope: "autorun" | "reaction",
+            options: IAutorunOptions | IReactionOptions<any, any>,
+        ) {
+            if (!mi.store) {
+                throw `[${scope}] Reactions must be defined after makeAutoObservableModel()`;
+            }
+            if (!options.name) {
+                const count = scope === "autorun" ? ++autoRunCount : ++reactionCount;
+                options.name = `${mi.store["#id"]}:${scope}:${count}`;
+            }
+            if (!options.onError) {
+                // TODO
+            }
+            if (scope === "reaction" && (options as IReactionOptions<any, any>).fireImmediately !== false) {
+                (options as IReactionOptions<any, any>).fireImmediately = true;
+            }
+            // options.scheduler = async (callback: () => void) => {
+            //     Promise.resolve().then(callback);
+            // };
+        }
+    }
+
+    function reactionDisposers(mi: StoreInternalContext<SD>) {
+        if (!mi.reactionDisposers) {
+            mi.reactionDisposers = [];
+        }
+        return mi.reactionDisposers;
     }
 
     function disposeStore(parentCtxt: StoreInternalContext<any>, store: Store<any>) {
@@ -223,7 +287,10 @@ export function createStore<SD extends StoreDef<object, object>>(
         model["#state"] = "DISPOSING";
         model["#ready"] = false;
 
-        // TODO: dispose reactions
+        // dispose reactions
+        if (mi.reactionDisposers) {
+            mi.reactionDisposers.forEach((disposer) => disposer());
+        }
 
         // call dispose on all child components
         if (mi.childCtxts) {

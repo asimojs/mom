@@ -105,7 +105,7 @@ describe("Mom init+dispose", () => {
             expect(diposeCompleteCount).toBe(1);
         });
 
-        // TODO: init with sub components
+        // init with sub components tested with FolderStore example
     });
 
     describe("Async init & dispose", () => {
