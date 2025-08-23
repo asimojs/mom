@@ -10,7 +10,7 @@ export function storeIId<D extends StoreDef<any, any>>(ns: InterfaceNamespace) {
 }
 
 export type IIDType<T extends InterfaceId<any>> = T extends InterfaceId<infer IType> ? IType : never;
-// ex: let x: IIDType<typeof BasicCounterSID>;
+// ex: let x: IIDType<typeof BasicCounterIID>;
 
 /**
  * Mom Store Factory - to instantitate Mom Stores
@@ -31,6 +31,13 @@ export interface StoreContext<D extends StoreDef<any, any>> {
      * Note: can be overridden with a child context to limit impact on the parent context
      **/
     context: AsmContext;
+
+    /**
+     * Create a child context on the current m.context container.
+     * The m.context reference will be automatically changed to the new child context and
+     * the child context name will the the store #id
+     */
+    createChildContext(): void;
     /**
      * The store associated to this context.
      * Note: the store is only defined after makeAutoObservableModel() has been called - null

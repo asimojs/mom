@@ -1,9 +1,9 @@
 import { storeFactory } from "@/mom";
-import { CountDownSID } from "./countdown.types";
+import { CountDownIID } from "./countdown.types";
 import { runInAction } from "mobx";
 
 // section#main
-export const CountDown = storeFactory(CountDownSID, (m, params) => {
+export const CountDown = storeFactory(CountDownIID, (m, params) => {
     const { initValue = 10, intervalMs = 1000, autoStart = false } = params;
 
     const model = m.makeAutoObservableModel({

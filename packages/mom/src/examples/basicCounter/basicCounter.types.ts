@@ -11,4 +11,4 @@ type BasicCounterDef = {
 };
 
 export type BasicCounterStore = Store<BasicCounterDef>;
-export const BasicCounterSID = storeIId<BasicCounterDef>("mom.examples.basicCounter");
+export const BasicCounterIID = storeIId<BasicCounterDef>("mom.examples.basicCounter");

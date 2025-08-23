@@ -1,4 +1,4 @@
-import { InterfaceId } from "@asimojs/asimo/dist/asimo.types";
+import { AsmContext, InterfaceId } from "@asimojs/asimo/dist/asimo.types";
 import { StoreFactory, StoreContext, StoreDef, Store, StoreInternalController } from "./mom.types";
 import { asm } from "@asimojs/asimo";
 import {
@@ -42,30 +42,30 @@ export function storeFactory<SD extends StoreDef<object, object>>(
     factory: (m: StoreContext<SD>, p: SD["params"]) => void,
 ): StoreFactory<SD>;
 /**
- * Create a Store factory associated to a Store Interface Id (aka. SID)
- * @param storeSID the store interface id (creatred with storeIId())
+ * Create a Store factory associated to a Store Interface Id (aka. IID)
+ * @param storeIID the store interface id (creatred with storeIId())
  * @param factory the store creation function
  */
 export function storeFactory<SD extends StoreDef<object, object>>(
-    storeSID: InterfaceId<StoreFactory<SD>> | string,
+    storeIID: InterfaceId<StoreFactory<SD>> | string,
     factory: (m: StoreContext<SD>, p: SD["params"]) => void,
 ): StoreFactory<SD>;
 
 export function storeFactory<SD extends StoreDef<object, object>>(
-    storeSIDorFactory: InterfaceId<StoreFactory<SD>> | string | ((m: StoreContext<SD>, p: SD["params"]) => void),
+    storeIIDorFactory: InterfaceId<StoreFactory<SD>> | string | ((m: StoreContext<SD>, p: SD["params"]) => void),
     factory?: (m: StoreContext<SD>, p: SD["params"]) => void,
 ): StoreFactory<SD> {
-    let storeSID: InterfaceId<StoreFactory<SD>> | null = null;
+    let storeIID: InterfaceId<StoreFactory<SD>> | null = null;
     let ns = "";
 
-    if (typeof storeSIDorFactory === "function") {
-        factory = storeSIDorFactory as (m: StoreContext<SD>, p: SD["params"]) => void;
+    if (typeof storeIIDorFactory === "function") {
+        factory = storeIIDorFactory as (m: StoreContext<SD>, p: SD["params"]) => void;
     } else {
-        if (typeof storeSIDorFactory === "string") {
-            ns = storeSIDorFactory;
+        if (typeof storeIIDorFactory === "string") {
+            ns = storeIIDorFactory;
         } else {
-            storeSID = storeSIDorFactory;
-            ns = storeSIDorFactory.ns;
+            storeIID = storeIIDorFactory;
+            ns = storeIIDorFactory.ns;
         }
     }
 
@@ -81,8 +81,8 @@ export function storeFactory<SD extends StoreDef<object, object>>(
         return mi.store!;
     }
     (stFactory as unknown as Writeable<StoreFactory<SD>>)["#namespace"] = ns;
-    if (storeSID) {
-        asm.registerFactory(storeSID, () => stFactory as StoreFactory<SD>);
+    if (storeIID) {
+        asm.registerFactory(storeIID, () => stFactory as StoreFactory<SD>);
     }
     return stFactory as StoreFactory<SD>;
 }
@@ -95,12 +95,10 @@ export function storeFactory<SD extends StoreDef<object, object>>(
  * @returns the store instance
  */
 export function createStore<SD extends StoreDef<object, object>>(
-    params: { $store: StoreFactory<SD> } & SD["params"],
+    params: { $store: StoreFactory<SD>; $context?: AsmContext } & SD["params"],
 ): Store<SD> {
-    const context = asm; // TODO: use context param or mom config
-
     let rootCtxt: StoreInternalContext<any> | null = null;
-    const store = _createStore(null, params);
+    const store = _createStore(null, params, params.$context ?? asm);
     (store as any).$dispose = () => {
         if (rootCtxt) {
             disposeCtxt(rootCtxt);
@@ -111,11 +109,12 @@ export function createStore<SD extends StoreDef<object, object>>(
     function _createStore(
         parent: StoreInternalContext<any> | null,
         params: { $store: StoreFactory<SD> } & SD["params"],
+        context: AsmContext,
     ) {
         const stFactory = params.$store;
         params.$store = null as any;
 
-        const mi = createStoreInternalContext(parent, stFactory, params);
+        const mi = createStoreInternalContext(parent, stFactory, params, context);
 
         stFactory(mi, params); // TODO: try/catch
 
@@ -143,10 +142,13 @@ export function createStore<SD extends StoreDef<object, object>>(
         parent: StoreInternalContext<any> | null,
         stFactory: StoreFactory<SD>,
         params: SD["params"],
+        context: AsmContext,
     ): StoreInternalContext<SD> {
         let createModelCalled = false;
         let autoRunCount = 0;
         let reactionCount = 0;
+        const ns = stFactory["#namespace"];
+        const storeId = `${ns}#${++storeCount}`;
 
         const momCtxt: StoreInternalContext<SD> = {
             parentCtxt: parent,
@@ -169,10 +171,9 @@ export function createStore<SD extends StoreDef<object, object>>(
                 }
                 const str = initialModel as Store<SD>;
                 const st: Writeable<Store<any>> = str;
-                const ns = stFactory["#namespace"];
                 st["#namespace"] = ns;
-                st["#id"] = `${ns}#${++storeCount}`;
-                st["#context"] = parent?.context || asm;
+                st["#id"] = storeId;
+                st["#context"] = parent?.context || context;
                 st["#ready"] = false;
                 st["#state"] = "INITIALIZING";
                 st["#initComplete"] = new Promise((resolve) => {
@@ -203,8 +204,11 @@ export function createStore<SD extends StoreDef<object, object>>(
                 }
                 return ctl;
             },
+            createChildContext(): void {
+                this.context = this.context.createChildContext(storeId);
+            },
             mount<SD extends StoreDef<any, any>>(params: { $store: StoreFactory<SD> } & SD["params"]): Store<SD> {
-                return _createStore(momCtxt, params);
+                return _createStore(momCtxt, params, this.context);
             },
             unmount(store: Store<any> | null): null {
                 if (store) {

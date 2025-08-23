@@ -1,8 +1,8 @@
 import { storeFactory } from "@/mom";
-import { FolderSID } from "./folder.types";
+import { FolderIID } from "./folder.types";
 
 // section#main
-export const Folder = storeFactory(FolderSID, (m, params) => {
+export const Folder = storeFactory(FolderIID, (m, params) => {
     const { data, parent, expanded = false } = params;
 
     const model = m.makeAutoObservableModel({

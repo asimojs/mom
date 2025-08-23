@@ -27,4 +27,4 @@ type CounterListDef = {
 };
 
 export type CounterListStore = Store<CounterListDef>;
-export const CounterListSID = storeIId<CounterListDef>("mom.examples.counterList");
+export const CounterListIID = storeIId<CounterListDef>("mom.examples.counterList");

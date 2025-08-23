@@ -41,4 +41,4 @@ export interface FolderData {
 // /section#folderdata
 
 export type FolderStore = Store<FolderDef>;
-export const FolderSID = storeIId<FolderDef>("mom.examples.Folder");
+export const FolderIID = storeIId<FolderDef>("mom.examples.Folder");
