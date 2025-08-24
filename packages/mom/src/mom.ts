@@ -1,6 +1,6 @@
-import { AsmContext, InterfaceId } from "@asimojs/asimo/dist/asimo.types";
+import { IoCContainer, InterfaceId, AsyncIID } from "@asimojs/asimo/dist/asimo.types";
 import { StoreFactory, StoreContext, StoreDef, Store, StoreInternalController } from "./mom.types";
-import { asm } from "@asimojs/asimo";
+import { asm, createContainer } from "@asimojs/asimo";
 import {
     autorun,
     IReactionDisposer,
@@ -55,7 +55,7 @@ export function storeFactory<SD extends StoreDef<object, object>>(
     storeIIDorFactory: InterfaceId<StoreFactory<SD>> | string | ((m: StoreContext<SD>, p: SD["params"]) => void),
     factory?: (m: StoreContext<SD>, p: SD["params"]) => void,
 ): StoreFactory<SD> {
-    let storeIID: InterfaceId<StoreFactory<SD>> | null = null;
+    let storeIID: AsyncIID<StoreFactory<SD>> | null = null;
     let ns = "";
 
     if (typeof storeIIDorFactory === "function") {
@@ -64,7 +64,7 @@ export function storeFactory<SD extends StoreDef<object, object>>(
         if (typeof storeIIDorFactory === "string") {
             ns = storeIIDorFactory;
         } else {
-            storeIID = storeIIDorFactory;
+            storeIID = storeIIDorFactory as AsyncIID<StoreFactory<SD>>;
             ns = storeIIDorFactory.ns;
         }
     }
@@ -95,7 +95,7 @@ export function storeFactory<SD extends StoreDef<object, object>>(
  * @returns the store instance
  */
 export function createStore<SD extends StoreDef<object, object>>(
-    params: { $store: StoreFactory<SD>; $context?: AsmContext } & SD["params"],
+    params: { $store: StoreFactory<SD>; $context?: IoCContainer } & SD["params"],
 ): Store<SD> {
     let rootCtxt: StoreInternalContext<any> | null = null;
     const store = _createStore(null, params, params.$context ?? asm);
@@ -109,7 +109,7 @@ export function createStore<SD extends StoreDef<object, object>>(
     function _createStore(
         parent: StoreInternalContext<any> | null,
         params: { $store: StoreFactory<SD> } & SD["params"],
-        context: AsmContext,
+        context: IoCContainer,
     ) {
         const stFactory = params.$store;
         params.$store = null as any;
@@ -142,7 +142,7 @@ export function createStore<SD extends StoreDef<object, object>>(
         parent: StoreInternalContext<any> | null,
         stFactory: StoreFactory<SD>,
         params: SD["params"],
-        context: AsmContext,
+        context: IoCContainer,
     ): StoreInternalContext<SD> {
         let createModelCalled = false;
         let autoRunCount = 0;
@@ -205,7 +205,7 @@ export function createStore<SD extends StoreDef<object, object>>(
                 return ctl;
             },
             createChildContext(): void {
-                this.context = this.context.createChildContext(storeId);
+                this.context = createContainer({ parent: this.context, name: storeId });
             },
             mount<SD extends StoreDef<any, any>>(params: { $store: StoreFactory<SD> } & SD["params"]): Store<SD> {
                 return _createStore(momCtxt, params, this.context);

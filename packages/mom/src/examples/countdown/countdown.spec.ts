@@ -1,16 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { asm, AsmContext } from "@asimojs/asimo";
+import { asm, createContainer, IoCContainer } from "@asimojs/asimo";
 import { disposeStore, createStore } from "@/mom";
 import { CountDown } from "./countdown";
 import { pause } from "@/mom.mocks";
 import { CountDownStore } from "./countdown.types";
 
 describe("CountDown", () => {
-    let context: AsmContext,
+    let context: IoCContainer,
         store: CountDownStore | null = null;
 
     beforeEach(() => {
-        context = asm.createChildContext("test:CountDown");
+        context = createContainer({ parent: asm, name: "test:CountDown" });
     });
 
     afterEach(() => {

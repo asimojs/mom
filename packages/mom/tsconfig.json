@@ -4,6 +4,7 @@
     "compilerOptions": {
         "outDir": "./lib",
         "esModuleInterop": true,
+        "skipLibCheck": true,
         "isolatedModules": true,
         "lib": ["ESNext", "DOM"],
         "paths": {

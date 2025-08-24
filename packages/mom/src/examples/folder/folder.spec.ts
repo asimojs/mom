@@ -1,15 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { asm, AsmContext } from "@asimojs/asimo";
+import { asm, IoCContainer, createContainer } from "@asimojs/asimo";
 import { disposeStore, createStore } from "@/mom";
 import { Folder } from "./folder";
 import { FolderStore, FolderData } from "./folder.types";
 
 describe("Folder", () => {
-    let context: AsmContext,
+    let context: IoCContainer,
         store: FolderStore | null = null;
 
     beforeEach(() => {
-        context = asm.createChildContext("test:Folder");
+        context = createContainer({ parent: asm, name: "test:Folder" });
     });
 
     afterEach(() => {
@@ -65,7 +65,8 @@ describe("Folder", () => {
             expect(f00.name).toBe("folderA.A");
             expect(f00.path).toBe("/folderA/folderA.A");
             expect(f00.isExpanded).toBe(false);
-            expect(f00.folders!.length).toBe(0); // not loaded yet
+            // @ts-ignore
+            expect(f00.folders.length).toBe(0); // not loaded yet
         });
 
         it("should load sub-store on-demand (init:expanded)", async () => {

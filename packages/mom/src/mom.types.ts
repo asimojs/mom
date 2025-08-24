@@ -1,12 +1,11 @@
-import { AsmContext, InterfaceId, InterfaceNamespace } from "@asimojs/asimo/dist/asimo.types";
-import { interfaceId as _interfaceId } from "@asimojs/asimo";
+import { IoCContainer, InterfaceId, asyncIID as _asyncIID } from "@asimojs/asimo";
 import { IAutorunOptions, IReactionDisposer, IReactionOptions, IReactionPublic } from "mobx";
 
 /** Create an interface identifier */
-export const interfaceId = _interfaceId;
+export const asyncIID = _asyncIID;
 
-export function storeIId<D extends StoreDef<any, any>>(ns: InterfaceNamespace) {
-    return interfaceId<StoreFactory<D>>(ns);
+export function storeIId<D extends StoreDef<any, any>>(ns: string) {
+    return _asyncIID<StoreFactory<D>>(ns);
 }
 
 export type IIDType<T extends InterfaceId<any>> = T extends InterfaceId<infer IType> ? IType : never;
@@ -30,7 +29,7 @@ export interface StoreContext<D extends StoreDef<any, any>> {
      * to all child components without definining explicit props
      * Note: can be overridden with a child context to limit impact on the parent context
      **/
-    context: AsmContext;
+    context: IoCContainer;
 
     /**
      * Create a child context on the current m.context container.
@@ -135,7 +134,7 @@ export interface StoreMetaData {
      */
     readonly "#id": string;
     /** The context associated to the store - allows to share or retrieve dependencies */
-    readonly "#context": AsmContext;
+    readonly "#context": IoCContainer;
     /** The store life cycle state from INITIALIZING to DISPOSED */
     readonly "#state": StoreState;
     /** True when the store state is READY */

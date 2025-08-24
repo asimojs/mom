@@ -1,7 +1,6 @@
-import { disposeStore, createStore, storeFactory } from "../mom";
+import { createStore, storeFactory } from "../mom";
 import { describe, expect, it } from "vitest";
-import { runInAction } from "mobx";
-import { asm, AsmContext, interfaceId } from "@asimojs/asimo";
+import { asm, createContainer, IoCContainer, syncIID } from "@asimojs/asimo";
 import { Store, storeIId } from "@/mom.types";
 
 interface TestDef {
@@ -16,10 +15,10 @@ interface TestDef {
 }
 type TestStore = Store<TestDef>;
 const TestStoreIID = storeIId<TestDef>("mom.tests.context.TestStore");
-const SomeConfigIID = interfaceId<{ depth: number }>("mom.tests.context.SomeConfig");
+const SomeConfigIID = syncIID<{ depth: number }>("mom.tests.context.SomeConfig");
 
 describe("Mom context", () => {
-    let storeContext: AsmContext | null = null;
+    let storeContext: IoCContainer | null = null;
 
     const TestStore = storeFactory(TestStoreIID, (m, params) => {
         const depth = params.depth ?? 1;
@@ -27,7 +26,7 @@ describe("Mom context", () => {
         storeContext = m.context;
 
         m.createChildContext();
-        m.context.registerObject(SomeConfigIID, { depth });
+        m.context.set(SomeConfigIID, { depth });
 
         m.makeAutoObservableModel({
             depth,
@@ -61,7 +60,7 @@ describe("Mom context", () => {
         });
 
         it("should be possible to call createStore with $context", async () => {
-            const c2 = asm.createChildContext("c2");
+            const c2 = createContainer({ parent: asm, name: "c2" });
             expect(c2).not.toBe(asm);
 
             storeContext = null;

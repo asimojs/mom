@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { asm, AsmContext } from "@asimojs/asimo";
+import { asm, createContainer, IoCContainer } from "@asimojs/asimo";
 import { createStore } from "@/mom";
 import { Counter } from "./counter";
 import { CounterIID } from "./counter.types";
 
 describe("Counter", () => {
-    let context: AsmContext,
+    let context: IoCContainer,
         onChangeValues: number[] = [];
 
     function onChange(v: number) {
@@ -14,7 +14,7 @@ describe("Counter", () => {
 
     beforeEach(() => {
         onChangeValues = [];
-        context = asm.createChildContext("test:Counter");
+        context = createContainer({ parent: asm, name: "test:Counter" });
     });
 
     describe("Load", () => {

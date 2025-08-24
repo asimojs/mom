@@ -40,18 +40,17 @@
         "npm-publish": "yarn prepublish && npm publish --access public"
     },
     "dependencies": {
-        "@asimojs/asimo": "^3.0.0",
-        "mobx": "^6.13.7"
+        "@asimojs/asimo": "^5.0.0"
     },
     "devDependencies": {
         "@types/react": "^19.1.9",
         "@vitest/coverage-v8": "^3.1.1",
         "@vitejs/plugin-react": "^4.7.0",
-        "mobx": "6.13.7",
+        "mobx": "^6.13.7",
         "mobx-react-lite": "4.1.0",
         "react": "19.1.1",
         "rimraf": "6.0.1",
-        "typescript": "^5.8.3",
+        "typescript": "^5.9.2",
         "vite": "^6.2.5",
         "vitest": "^3.1.1"
     },
