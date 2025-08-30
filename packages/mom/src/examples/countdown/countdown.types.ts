@@ -1,7 +1,7 @@
 import { Store, storeIId } from "@/mom.types";
 
 // section#main
-type CountDownDef = {
+export type CountDownDef = {
     params: {
         /** The initial countdown counter value - default: 10 */
         initValue?: number;

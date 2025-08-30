@@ -32,6 +32,8 @@ interface StoreInternalContext<SD extends StoreDef<any, any>> extends StoreConte
     dispose: (() => void) | null;
     resolveInit: (() => void) | null;
     resolveDispose: (() => void) | null;
+    rejectInit: ((reason?: any) => void) | null;
+    rejectDispose: ((reason?: any) => void) | null;
 }
 
 /**
@@ -157,7 +159,9 @@ export function createStore<SD extends StoreDef<object, object>>(
             init: null,
             dispose: null,
             resolveInit: null,
+            rejectInit: null,
             resolveDispose: null,
+            rejectDispose: null,
             store: null as Store<SD> | null,
             reactionDisposers: null,
             makeAutoObservableModel(initialModel: SD["model"]): SD["model"] {
@@ -176,19 +180,21 @@ export function createStore<SD extends StoreDef<object, object>>(
                 st["#context"] = parent?.context || context;
                 st["#ready"] = false;
                 st["#state"] = "INITIALIZING";
-                st["#initComplete"] = new Promise((resolve) => {
+                st["#initComplete"] = new Promise((resolve, reject) => {
                     momCtxt.resolveInit = () => {
                         st["#state"] = "READY";
                         st["#ready"] = true;
                         resolve(undefined);
                     };
+                    momCtxt.rejectInit = reject;
                 });
-                st["#disposeComplete"] = new Promise((resolve) => {
+                st["#disposeComplete"] = new Promise((resolve, reject) => {
                     momCtxt.resolveDispose = () => {
                         st["#state"] = "DISPOSED";
                         st["#ready"] = false;
                         resolve(undefined);
                     };
+                    momCtxt.rejectDispose = reject;
                 });
 
                 this.store = makeAutoObservable(initialModel) as Store<SD>;
@@ -331,19 +337,25 @@ function isPromise(p: any): p is Promise<unknown> {
 function processLifeCycleFunction(name: "INIT" | "DISPOSE", mi: StoreInternalContext<any>) {
     const initOrDispose = name === "INIT" ? mi.init : mi.dispose;
     const resolve = name === "INIT" ? mi.resolveInit : mi.resolveDispose;
+    const reject = name === "INIT" ? mi.rejectInit : mi.rejectDispose;
     if (initOrDispose) {
         try {
             const result = initOrDispose();
             if (isPromise(result)) {
-                result.then(() => {
-                    resolve?.();
-                });
+                result
+                    .then(() => {
+                        resolve?.();
+                    })
+                    .catch((ex) => {
+                        // TODO error
+                        reject?.(`Unexpected Store error during ${name}: ${ex}`);
+                    });
             } else {
                 resolve?.();
             }
         } catch (ex) {
-            // TODO error
-            throw `Unexpected Store error during ${name}: ${ex}`;
+            // TODO Error
+            reject?.(`Unexpected Store error during ${name}: ${ex}`);
         }
     } else {
         resolve?.();
