@@ -18,7 +18,6 @@ export const CountDown = storeFactory(CountDownIID, (m, params) => {
         /** Start the countdown */
         start(): void {
             if (controller.intervalId || !timeService) return; // already running
-            // note: DI context should be used instead of using setInterval directly
             controller.intervalId = timeService.setInterval(() => {
                 runInAction(() => {
                     if (model.value > 0) {
@@ -33,7 +32,6 @@ export const CountDown = storeFactory(CountDownIID, (m, params) => {
         /** Stop the countdown */
         stop(): void {
             if (!controller || !timeService) return; // already stopped
-            // note: DI context should be used instead of using clearInterval directly
             timeService.clearInterval(controller.intervalId);
             controller.intervalId = 0;
         },

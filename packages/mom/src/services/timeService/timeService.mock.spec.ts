@@ -1,7 +1,7 @@
 import { asm, createContainer, IoCContainer } from "@asimojs/asimo";
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { createFakeTimeService, FakeTimeServiceController } from "./timeService.mock";
-import { TimeService, TimeServiceIID } from "./timeService.types";
+import { createFakeTimeService } from "./timeService.mock";
+import { FakeTimeServiceController, TimeService, TimeServiceIID } from "./timeService.types";
 
 describe("Fake Time Service", () => {
     let context: IoCContainer,

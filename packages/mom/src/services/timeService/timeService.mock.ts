@@ -1,21 +1,8 @@
 import { IoCContainer } from "@asimojs/asimo";
-import { IntervalId, TimeoutId, TimeService, TimeServiceIID } from "./timeService.types";
+import { FakeTimeServiceController, IntervalId, TimeoutId, TimeService, TimeServiceIID } from "./timeService.types";
 
 const DEFAULT_DATE = "2025-01-01T12:00:00.000Z";
 const DEVAULT_NOW = new Date(DEFAULT_DATE).getTime();
-
-export interface FakeTimeServiceController {
-    /** Move the current time by x ms and executes all interval / timeout callbacks */
-    moveTime(durationMs: number): void;
-    /** Move the current time to the next callback and execute it */
-    executeNextCallback(): boolean;
-    /** Return the number of intervals still active */
-    readonly numberOfActiveIntervals: number;
-    /** Return the numbe of timeouts still active */
-    readonly numberOfActiveTimeouts: number;
-    /** Reset internal state */
-    reset(): void;
-}
 
 /**
  * Callback linked list used to store the next callbacks to execute

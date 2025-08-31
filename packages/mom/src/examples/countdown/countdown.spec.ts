@@ -3,8 +3,10 @@ import { asm, createContainer, IoCContainer } from "@asimojs/asimo";
 import { disposeStore, createStore } from "@/mom";
 import { CountDown } from "./countdown";
 import { CountDownDef, CountDownStore } from "./countdown.types";
-import { createFakeTimeService, FakeTimeServiceController } from "@/services/timeService/timeService.mock";
+import { createFakeTimeService } from "@/services/timeService/timeService.mock";
+import { FakeTimeServiceController } from "@/services/timeService/timeService.types";
 
+// section#start
 describe("CountDown", () => {
     let context: IoCContainer, store: CountDownStore, timeController: FakeTimeServiceController;
 
@@ -24,7 +26,10 @@ describe("CountDown", () => {
         }
     }
 
+    // /section#start
+
     describe("Load", () => {
+        // section#defaultValues
         it("should support default values", async () => {
             await init({}, false);
             expect(store["#ready"]).toBe(false); // async init
@@ -36,20 +41,18 @@ describe("CountDown", () => {
             expect(store["#ready"]).toBe(true);
 
             // test that the default autoStart is false
-            timeController.moveTime(2000);
-            expect(store.value).toBe(10); // unchanged
+            timeController.moveTime(2000); // 2s
+            expect(store.value).toBe(10); // unchanged -> not started
 
             // test the default intervalMs is 1000ms
             store.start();
             timeController.moveTime(999);
-            expect(store.value).toBe(10);
+            expect(store.value).toBe(10); // not yet
 
             timeController.moveTime(1);
             expect(store.value).toBe(9); // countdown started
-
-            timeController.moveTime(1000);
-            expect(store.value).toBe(8);
         });
+        // /section#defaultValues
 
         it("should throw an error if no TimeService is provided", async () => {
             asm.logger = null; // prevent error to be logged on the console
@@ -90,6 +93,7 @@ describe("CountDown", () => {
     });
 
     describe("Actions", () => {
+        // section#start-stop
         it("should support start / stop (autoStart false)", async () => {
             await init({ intervalMs: 5 });
             expect(store["#ready"]).toBe(true);
@@ -107,7 +111,7 @@ describe("CountDown", () => {
             store.stop();
             expect(store.isRunning).toBe(false);
 
-            timeController.moveTime(10);
+            timeController.moveTime(100);
             expect(store.value).toBe(8); // unchanged
             expect(store.isRunning).toBe(false);
 
@@ -116,6 +120,21 @@ describe("CountDown", () => {
             timeController.moveTime(7);
 
             expect(store.value).toBe(7);
+        });
+        // /section#start-stop
+
+        it("should stop the countdown when 0 is reached", async () => {
+            await init({ autoStart: true });
+            expect(store.value).toBe(10);
+
+            timeController.moveTime(9000); // 9s later
+            expect(store.value).toBe(1);
+
+            timeController.moveTime(1000); // 1s more
+            expect(store.value).toBe(0);
+
+            timeController.moveTime(5000); // 5s more
+            expect(store.value).toBe(0); // unchanged
         });
 
         it("should support start / stop (autoStart true)", async () => {

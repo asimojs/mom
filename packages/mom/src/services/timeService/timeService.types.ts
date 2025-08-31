@@ -1,3 +1,4 @@
+// section#all
 import { asyncIID } from "@asimojs/asimo";
 
 export type IntervalId = number;
@@ -40,3 +41,19 @@ export interface TimeService {
 }
 
 export const TimeServiceIID = asyncIID<TimeService>("mom.services.TimeService");
+// /section#all
+
+// section#controllerAPI
+export interface FakeTimeServiceController {
+    /** Move the current time by x ms and executes all interval / timeout callbacks */
+    moveTime(durationMs: number): void;
+    /** Move the current time to the next callback and execute it */
+    executeNextCallback(): boolean;
+    /** Return the number of intervals still active */
+    readonly numberOfActiveIntervals: number;
+    /** Return the numbe of timeouts still active */
+    readonly numberOfActiveTimeouts: number;
+    /** Reset internal state */
+    reset(): void;
+}
+// /section#controllerAPI
