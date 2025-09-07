@@ -50,7 +50,7 @@ class FakeClipboardService implements ClipboardService, FakeClipboardServiceCont
     }
 }
 
-export function createFakeCllipboardService(
+export function createFakeClipboardService(
     context: IoCContainer,
     clipboardContent?: string,
 ): FakeClipboardServiceController {

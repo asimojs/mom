@@ -1,6 +1,6 @@
 import { asm, createContainer, IoCContainer } from "@asimojs/asimo";
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { createFakeCllipboardService } from "./clipboardService.mock";
+import { createFakeClipboardService } from "./clipboardService.mock";
 import { FakeClipboardServiceController, ClipboardService, ClipboardServiceIID } from "./clipboardService.types";
 
 describe("Fake Clipboard Service", () => {
@@ -8,7 +8,7 @@ describe("Fake Clipboard Service", () => {
 
     beforeEach(() => {
         context = createContainer({ parent: asm, name: "test:fakeClipboardService" });
-        clipboardController = createFakeCllipboardService(context);
+        clipboardController = createFakeClipboardService(context);
     });
 
     describe("Read", () => {
@@ -33,7 +33,7 @@ describe("Fake Clipboard Service", () => {
         });
 
         it("should return the clipboard content when set", async () => {
-            createFakeCllipboardService(context, "Hello World");
+            createFakeClipboardService(context, "Hello World");
             const clipboard = await context.fetch(ClipboardServiceIID);
             expect(await clipboard.readText()).toBe("Hello World");
             expect(await clipboard.readText()).toBe("Hello World"); // not changed after the 1st call

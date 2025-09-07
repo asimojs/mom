@@ -1,4 +1,5 @@
-import { ClipboardService } from "./clipboardService.types";
+import { asm } from "@asimojs/asimo";
+import { ClipboardService, ClipboardServiceIID } from "./clipboardService.types";
 
 export const clipboardService: ClipboardService = {
     writeText(newClipText: string): Promise<void> {
@@ -8,3 +9,5 @@ export const clipboardService: ClipboardService = {
         return navigator.clipboard.readText();
     },
 };
+
+asm.registerService(ClipboardServiceIID, () => clipboardService);
