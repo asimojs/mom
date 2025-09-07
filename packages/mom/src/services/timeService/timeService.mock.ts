@@ -16,7 +16,7 @@ interface CallBack {
     next: CallBack | null;
 }
 
-class FakeTimeService implements FakeTimeServiceController, TimeService {
+class FakeTimeService implements TimeService, FakeTimeServiceController {
     private initialTimeMs = 0;
     private intervalCount = 0;
     private nextCallback: CallBack | null = null;
