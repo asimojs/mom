@@ -1,7 +1,7 @@
 import { asm, createContainer, IoCContainer } from "@asimojs/asimo";
-import { describe, expect, it, beforeEach, afterEach } from "vitest";
+import { describe, expect, it, beforeEach } from "vitest";
 import { createFakeClipboardService } from "./clipboardService.mock";
-import { FakeClipboardServiceController, ClipboardService, ClipboardServiceIID } from "./clipboardService.types";
+import { FakeClipboardServiceController, ClipboardServiceIID } from "./clipboardService.types";
 
 describe("Fake Clipboard Service", () => {
     let context: IoCContainer, clipboardController: FakeClipboardServiceController;
