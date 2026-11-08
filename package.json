@@ -2,20 +2,17 @@
     "name": "mom-project",
     "description": "Component system for react apps",
     "private": true,
-    "workspaces": [
-        "packages/*"
-    ],
     "repository": {
         "type": "git",
         "url": "https://github.com/asimojs/mom"
     },
     "license": "MIT",
     "scripts": {
-        "test-mom": "yarn workspace @asimojs/mom test run",
-        "test": "yarn test-mom",
-        "build-mom": "yarn workspace @asimojs/mom build",
-        "build": "yarn build-mom",
-        "prepublish": "yarn build && yarn test"
+        "test-mom": "pnpm --filter @asimojs/mom test run",
+        "test": "pnpm run test-mom",
+        "build-mom": "pnpm --filter @asimojs/mom build",
+        "build": "pnpm run build-mom",
+        "prepublishOnly": "pnpm run build && pnpm test"
     },
-    "packageManager": "yarn@1.22.19"
+    "packageManager": "pnpm@10.30.3"
 }

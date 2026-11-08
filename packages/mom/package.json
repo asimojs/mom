@@ -33,11 +33,11 @@
     ],
     "scripts": {
         "clean": "rimraf dist lib",
-        "build": "yarn clean && tsc && vite build && cp -R lib/*.d.ts dist",
+        "build": "pnpm run clean && tsc && vite build && cp -R lib/*.d.ts dist",
         "test": "vitest",
         "coverage": "vitest run --coverage",
-        "prepublish": "yarn build && vitest run",
-        "npm-publish": "yarn prepublish && npm publish --access public"
+        "prepublishOnly": "pnpm run build && vitest run",
+        "npm-publish": "pnpm run prepublishOnly && npm publish --access public"
     },
     "dependencies": {
         "@asimojs/asimo": "^5.0.0"
@@ -53,6 +53,5 @@
         "typescript": "^5.9.2",
         "vite": "^6.2.5",
         "vitest": "^3.1.1"
-    },
-    "packageManager": "yarn@1.22.19"
+    }
 }
