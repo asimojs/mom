@@ -1,9 +1,25 @@
-import { IoCContainer } from "@asimojs/asimo";
+import { factory } from "@asimojs/asimo";
 import { FakeStorageController, LocalStorageIID, SessionStorageIID, StorageService } from "./storageService.types";
 
 class FakeStorageService implements StorageService, FakeStorageController {
+    readonly factory: FakeStorageController["factory"];
+
     private storage: Map<string, string> = new Map();
     private keys: string[] | null = null;
+
+    constructor(type: "local" | "session") {
+        if (type === "local") {
+            this.factory = factory({
+                provide: [LocalStorageIID],
+                load: async () => this,
+            });
+        } else {
+            this.factory = factory({
+                provide: [SessionStorageIID],
+                load: async () => this,
+            });
+        }
+    }
 
     get length() {
         return this.storage.size;
@@ -36,12 +52,11 @@ class FakeStorageService implements StorageService, FakeStorageController {
     }
 }
 
-export function createFakeStorageService(context: IoCContainer, type: "local" | "session"): FakeStorageController {
-    const service = new FakeStorageService();
-    if (type === "local") {
-        context.registerService(LocalStorageIID, () => service);
-    } else if (type === "session") {
-        context.registerService(SessionStorageIID, () => service);
-    }
+/**
+ * Create a fake StorageService instance
+ * @param type "local" or "session" storage
+ */
+export function createFakeStorageService(type: "local" | "session"): FakeStorageController {
+    const service = new FakeStorageService(type);
     return service;
 }

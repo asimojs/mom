@@ -1,9 +1,13 @@
-import { IoCContainer } from "@asimojs/asimo";
+import { factory } from "@asimojs/asimo";
 import { FakeURLParamsServiceController, URLParamsService, URLParamsServiceIID } from "./urlParamsService.types";
-import { FakeClipboardServiceController } from "../clipboardService/clipboardService.types";
 import { paramsToMap } from "./urlParamsService";
 
 class FakeURLParamsService implements URLParamsService, FakeURLParamsServiceController {
+    readonly factory = factory({
+        provide: [URLParamsServiceIID],
+        load: async () => this,
+    });
+
     private params: Map<string, string> = new Map();
 
     constructor(initialParams?: { [name: string]: string }) {
@@ -49,11 +53,11 @@ class FakeURLParamsService implements URLParamsService, FakeURLParamsServiceCont
     }
 }
 
-export function createFakeURLParamsService(
-    context: IoCContainer,
-    initialParams?: { [name: string]: string },
-): FakeURLParamsServiceController {
+/**
+ * Create a fake URLParamsService instance
+ * @param initialParams (optional) the initial URL query params
+ */
+export function createFakeURLParamsService(initialParams?: { [name: string]: string }): FakeURLParamsServiceController {
     const service = new FakeURLParamsService(initialParams);
-    context.registerService(URLParamsServiceIID, () => service);
     return service;
 }

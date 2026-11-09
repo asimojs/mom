@@ -1,15 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { asm, IoCContainer, createContainer } from "@asimojs/asimo";
-import { disposeStore, createStore } from "@/mom";
+import { Container, createContainer } from "@asimojs/asimo";
+import { disposeStore, createStore, rootContext } from "@/mom";
 import { Folder } from "./folder";
 import { FolderStore, FolderData } from "./folder.types";
 
 describe("Folder", () => {
-    let context: IoCContainer,
+    let context: Container<any>,
         store: FolderStore | null = null;
 
     beforeEach(() => {
-        context = createContainer({ parent: asm, name: "test:Folder" });
+        context = createContainer({ extends: [rootContext], name: "test:Folder" });
     });
 
     afterEach(() => {

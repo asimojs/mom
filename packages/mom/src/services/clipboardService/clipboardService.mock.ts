@@ -1,10 +1,15 @@
-import { IoCContainer } from "@asimojs/asimo";
+import { factory } from "@asimojs/asimo";
 import { ClipboardService, ClipboardServiceIID, FakeClipboardServiceController } from "./clipboardService.types";
 import { createErrorCounter } from "../utils/errorCounter/errorCounter";
 
 class FakeClipboardService implements ClipboardService, FakeClipboardServiceController {
     private readTextErrorCounter = createErrorCounter();
     private writeTextErrorCounter = createErrorCounter();
+
+    readonly factory = factory({
+        provide: [ClipboardServiceIID],
+        load: async () => this,
+    });
 
     constructor(private clipboardContent: string = "") {}
 
@@ -50,11 +55,11 @@ class FakeClipboardService implements ClipboardService, FakeClipboardServiceCont
     }
 }
 
-export function createFakeClipboardService(
-    context: IoCContainer,
-    clipboardContent?: string,
-): FakeClipboardServiceController {
+/**
+ * Create a fake ClipboardService instance
+ * @param clipboardContent (optional) the initial clipboard content
+ */
+export function createFakeClipboardService(clipboardContent?: string): FakeClipboardServiceController {
     const service = new FakeClipboardService(clipboardContent);
-    context.registerService(ClipboardServiceIID, () => service);
     return service;
 }

@@ -1,4 +1,4 @@
-import { asyncIID } from "@asimojs/asimo";
+import { asyncIID, ServiceFactory } from "@asimojs/asimo";
 
 export interface ClipboardService {
     /**
@@ -20,9 +20,11 @@ export interface ClipboardService {
     readText(): Promise<string>;
 }
 
-export const ClipboardServiceIID = asyncIID<ClipboardService>("mom.services.ClipboardService");
+export const ClipboardServiceIID = asyncIID<ClipboardService>()("mom.services.ClipboardService");
 
 export interface FakeClipboardServiceController {
+    /** Factory to create a child context providing this fake clipboard service */
+    readonly factory: ServiceFactory<[typeof ClipboardServiceIID]>;
     /**
      * Configure the service to throw an error on one of the selected methods
      * after the nth call

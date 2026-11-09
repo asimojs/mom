@@ -1,14 +1,17 @@
-import { IoCContainer, InterfaceId, asyncIID as _asyncIID } from "@asimojs/asimo";
+import { Container, InterfaceId, AsyncIID, ServiceFactory, asyncIID as _asyncIID } from "@asimojs/asimo";
 import { IAutorunOptions, IReactionDisposer, IReactionOptions, IReactionPublic } from "mobx";
 
 /** Create an interface identifier */
 export const asyncIID = _asyncIID;
 
+/** Backward-compatible alias for the Asimo 7 Container type */
+export type IoCContainer = Container<any>;
+
 export function storeIId<D extends StoreDef<any, any>>(ns: string) {
-    return _asyncIID<StoreFactory<D>>(ns);
+    return _asyncIID<StoreFactory<D>>()(ns);
 }
 
-export type IIDType<T extends InterfaceId<any>> = T extends InterfaceId<infer IType> ? IType : never;
+export type IIDType<T extends InterfaceId<any, any>> = T extends InterfaceId<infer IType, any> ? IType : never;
 // ex: let x: IIDType<typeof BasicCounterIID>;
 
 /**
@@ -29,14 +32,14 @@ export interface StoreContext<D extends StoreDef<any, any>> {
      * to all child components without definining explicit props
      * Note: can be overridden with a child context to limit impact on the parent context
      **/
-    context: IoCContainer;
+    context: Container<any>;
 
     /**
      * Create a child context on the current m.context container.
      * The m.context reference will be automatically changed to the new child context and
      * the child context name will the the store #id
      */
-    createChildContext(): void;
+    createChildContext(services?: ServiceFactory<any, any>[]): void;
     /**
      * The store associated to this context.
      * Note: the store is only defined after makeAutoObservableModel() has been called - null
@@ -134,7 +137,7 @@ export interface StoreMetaData {
      */
     readonly "#id": string;
     /** The context associated to the store - allows to share or retrieve dependencies */
-    readonly "#context": IoCContainer;
+    readonly "#context": Container<any>;
     /** The store life cycle state from INITIALIZING to DISPOSED */
     readonly "#state": StoreState;
     /** True when the store state is READY */

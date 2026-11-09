@@ -1,4 +1,5 @@
-import { asm } from "@asimojs/asimo";
+import { factory } from "@asimojs/asimo";
+import { registerRootService } from "@/mom";
 import { URLParamsService, URLParamsServiceIID } from "./urlParamsService.types";
 
 const urlParmsService = {
@@ -50,4 +51,9 @@ export function paramsToMap(
     return m;
 }
 
-asm.registerService(URLParamsServiceIID, () => urlParmsService);
+export const urlParamsServiceFactory = factory({
+    provide: [URLParamsServiceIID],
+    load: async () => urlParmsService,
+});
+
+registerRootService(urlParamsServiceFactory);

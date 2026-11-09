@@ -1,5 +1,5 @@
 // section#all
-import { asyncIID } from "@asimojs/asimo";
+import { asyncIID, ServiceFactory } from "@asimojs/asimo";
 
 export type IntervalId = number;
 export type TimeoutId = number;
@@ -40,11 +40,13 @@ export interface TimeService {
     clearTimeout(id: TimeoutId | undefined): void;
 }
 
-export const TimeServiceIID = asyncIID<TimeService>("mom.services.TimeService");
+export const TimeServiceIID = asyncIID<TimeService>()("mom.services.TimeService");
 // /section#all
 
 // section#controllerAPI
 export interface FakeTimeServiceController {
+    /** Factory to create a child context providing this fake time service */
+    readonly factory: ServiceFactory<[typeof TimeServiceIID]>;
     /** Move the current time by x ms and executes all interval / timeout callbacks */
     moveTime(durationMs: number): void;
     /** Move the current time to the next callback and execute it */

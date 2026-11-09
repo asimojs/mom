@@ -3,6 +3,7 @@
     "extends": "../../tsconfig.json",
     "compilerOptions": {
         "outDir": "./lib",
+        "rootDir": "./src",
         "esModuleInterop": true,
         "skipLibCheck": true,
         "isolatedModules": true,

@@ -1,4 +1,5 @@
-import { asm } from "@asimojs/asimo";
+import { factory } from "@asimojs/asimo";
+import { registerRootService } from "@/mom";
 import { IntervalId, TimeoutId, TimeService, TimeServiceIID } from "./timeService.types";
 
 export const timeService: TimeService = {
@@ -19,4 +20,9 @@ export const timeService: TimeService = {
     },
 };
 
-asm.registerService(TimeServiceIID, () => timeService);
+export const timeServiceFactory = factory({
+    provide: [TimeServiceIID],
+    load: async () => timeService,
+});
+
+registerRootService(timeServiceFactory);

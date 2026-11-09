@@ -1,4 +1,4 @@
-import { asyncIID } from "@asimojs/asimo";
+import { asyncIID, ServiceFactory } from "@asimojs/asimo";
 
 /**
  * Service to read or write the URL query parameters (aka. search)
@@ -18,9 +18,11 @@ export interface URLParamsService {
     setURLParams(params: Map<string, string | null> | Record<string, string | null>): void;
 }
 
-export const URLParamsServiceIID = asyncIID<URLParamsService>("mom.services.URLParamsService");
+export const URLParamsServiceIID = asyncIID<URLParamsService>()("mom.services.URLParamsService");
 
 export interface FakeURLParamsServiceController {
+    /** Factory to create a child context providing this fake URL params service */
+    readonly factory: ServiceFactory<[typeof URLParamsServiceIID]>;
     /** Return the url.search part, encoded - e.g. "?q=123&mode=234" */
     getURLSearch(): string;
     /** Reset internal state */

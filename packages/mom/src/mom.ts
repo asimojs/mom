@@ -1,6 +1,5 @@
-import { IoCContainer, InterfaceId, AsyncIID } from "@asimojs/asimo/dist/asimo.types";
+import { Container, AsyncIID, InterfaceId, ServiceFactory, createContainer, factory } from "@asimojs/asimo";
 import { StoreFactory, StoreContext, StoreDef, Store, StoreInternalController } from "./mom.types";
-import { asm, createContainer } from "@asimojs/asimo";
 import {
     autorun,
     IReactionDisposer,
@@ -11,6 +10,41 @@ import {
     reaction,
     runInAction,
 } from "mobx";
+
+/** Registered root service factories, keyed by IID namespace */
+const rootServices = new Map<string, ServiceFactory<any, any>>();
+let currentContainer = createContainer({ name: "asm" });
+
+function rebuildContainer() {
+    const services = Array.from(new Set(rootServices.values()));
+    currentContainer = createContainer({ name: "asm", services });
+}
+
+/**
+ * Register a service factory on the root application context.
+ * The root container is rebuilt so that existing children extending it
+ * can resolve newly registered services through the stable rootContext proxy.
+ */
+export function registerRootService(serviceFactory: ServiceFactory<any, any>) {
+    for (const iid of serviceFactory.provide) {
+        rootServices.set(iid.ns, serviceFactory);
+    }
+    rebuildContainer();
+}
+
+/**
+ * Stable root Asimo container proxy, named asm and backed by a mutable container
+ * that is rebuilt whenever registerRootService() is called.
+ */
+export const rootContext: Container<any> = new Proxy(currentContainer, {
+    get(_target, prop, _receiver) {
+        const value = (currentContainer as any)[prop];
+        if (typeof value === "function") {
+            return value.bind(currentContainer);
+        }
+        return value;
+    },
+});
 
 /** Store counter to generate unique ids */
 let storeCount = 0;
@@ -41,27 +75,27 @@ interface StoreInternalContext<SD extends StoreDef<any, any>> extends StoreConte
  * @param factory the store creation function
  */
 export function storeFactory<SD extends StoreDef<object, object>>(
-    factory: (m: StoreContext<SD>, p: SD["params"]) => void,
+    createFn: (m: StoreContext<SD>, p: SD["params"]) => void,
 ): StoreFactory<SD>;
 /**
  * Create a Store factory associated to a Store Interface Id (aka. IID)
  * @param storeIID the store interface id (creatred with storeIId())
- * @param factory the store creation function
+ * @param createFn the store creation function
  */
 export function storeFactory<SD extends StoreDef<object, object>>(
     storeIID: InterfaceId<StoreFactory<SD>> | string,
-    factory: (m: StoreContext<SD>, p: SD["params"]) => void,
+    createFn: (m: StoreContext<SD>, p: SD["params"]) => void,
 ): StoreFactory<SD>;
 
 export function storeFactory<SD extends StoreDef<object, object>>(
     storeIIDorFactory: InterfaceId<StoreFactory<SD>> | string | ((m: StoreContext<SD>, p: SD["params"]) => void),
-    factory?: (m: StoreContext<SD>, p: SD["params"]) => void,
+    createFn?: (m: StoreContext<SD>, p: SD["params"]) => void,
 ): StoreFactory<SD> {
     let storeIID: AsyncIID<StoreFactory<SD>> | null = null;
     let ns = "";
 
     if (typeof storeIIDorFactory === "function") {
-        factory = storeIIDorFactory as (m: StoreContext<SD>, p: SD["params"]) => void;
+        createFn = storeIIDorFactory as (m: StoreContext<SD>, p: SD["params"]) => void;
     } else {
         if (typeof storeIIDorFactory === "string") {
             ns = storeIIDorFactory;
@@ -71,20 +105,25 @@ export function storeFactory<SD extends StoreDef<object, object>>(
         }
     }
 
-    if (!factory) {
+    if (!createFn) {
         // TODO error
         throw "Invalid Store Factory function";
     }
 
     function stFactory(m: StoreContext<SD>, params: SD["params"]): Store<SD> {
-        factory!(m, params); // TODO: try/catch
+        createFn!(m, params); // TODO: try/catch
         const mi = m as StoreInternalContext<SD>;
         processLifeCycleFunction("INIT", mi);
         return mi.store!;
     }
     (stFactory as unknown as Writeable<StoreFactory<SD>>)["#namespace"] = ns;
     if (storeIID) {
-        asm.registerFactory(storeIID, () => stFactory as StoreFactory<SD>);
+        registerRootService(
+            factory({
+                provide: [storeIID],
+                load: async () => stFactory as StoreFactory<SD>,
+            }),
+        );
     }
     return stFactory as StoreFactory<SD>;
 }
@@ -97,10 +136,10 @@ export function storeFactory<SD extends StoreDef<object, object>>(
  * @returns the store instance
  */
 export function createStore<SD extends StoreDef<object, object>>(
-    params: { $store: StoreFactory<SD>; $context?: IoCContainer } & SD["params"],
+    params: { $store: StoreFactory<SD>; $context?: Container<any> } & SD["params"],
 ): Store<SD> {
     let rootCtxt: StoreInternalContext<any> | null = null;
-    const store = _createStore(null, params, params.$context ?? asm);
+    const store = _createStore(null, params, params.$context ?? rootContext);
     (store as any).$dispose = () => {
         if (rootCtxt) {
             disposeCtxt(rootCtxt);
@@ -111,7 +150,7 @@ export function createStore<SD extends StoreDef<object, object>>(
     function _createStore(
         parent: StoreInternalContext<any> | null,
         params: { $store: StoreFactory<SD> } & SD["params"],
-        context: IoCContainer,
+        context: Container<any>,
     ) {
         const stFactory = params.$store;
         params.$store = null as any;
@@ -144,7 +183,7 @@ export function createStore<SD extends StoreDef<object, object>>(
         parent: StoreInternalContext<any> | null,
         stFactory: StoreFactory<SD>,
         params: SD["params"],
-        context: IoCContainer,
+        context: Container<any>,
     ): StoreInternalContext<SD> {
         let createModelCalled = false;
         let autoRunCount = 0;
@@ -210,8 +249,8 @@ export function createStore<SD extends StoreDef<object, object>>(
                 }
                 return ctl;
             },
-            createChildContext(): void {
-                this.context = createContainer({ parent: this.context, name: storeId });
+            createChildContext(services?: ServiceFactory<any, any>[]): void {
+                this.context = createContainer({ name: storeId, extends: [this.context], services });
             },
             mount<SD extends StoreDef<any, any>>(params: { $store: StoreFactory<SD> } & SD["params"]): Store<SD> {
                 return _createStore(momCtxt, params, this.context);

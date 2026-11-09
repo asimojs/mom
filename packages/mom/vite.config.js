@@ -7,19 +7,18 @@ export default defineConfig({
     plugins: [react()],
     resolve: {
         alias: {
-            "@": resolve(__dirname, "./src"),
+            "@": resolve(import.meta.dirname, "./src"),
         },
     },
     build: {
         lib: {
             // Could also be a dictionary or array of multiple entry points
-            entry: resolve(__dirname, "lib/mom.js"),
+            entry: resolve(import.meta.dirname, "lib/mom.js"),
             name: "mom",
             fileName: "mom",
         },
-        rollupOptions: {},
     },
     test: {
-        exclude: ["lib/*", "node_modules/*", "misc/*", "**/node_modules/*"],
+        exclude: ["dist/**", "lib/**", "node_modules/**", "misc/**"],
     },
 });

@@ -1,4 +1,5 @@
-import { asm } from "@asimojs/asimo";
+import { factory } from "@asimojs/asimo";
+import { registerRootService } from "@/mom";
 import { LocalStorageIID, SessionStorageIID, StorageService } from "./storageService.types";
 
 class _Storage implements StorageService {
@@ -24,5 +25,15 @@ class _Storage implements StorageService {
     }
 }
 
-asm.registerService(LocalStorageIID, () => new _Storage(localStorage));
-asm.registerService(SessionStorageIID, () => new _Storage(sessionStorage));
+export const localStorageFactory = factory({
+    provide: [LocalStorageIID],
+    load: async () => new _Storage(localStorage),
+});
+
+export const sessionStorageFactory = factory({
+    provide: [SessionStorageIID],
+    load: async () => new _Storage(sessionStorage),
+});
+
+registerRootService(localStorageFactory);
+registerRootService(sessionStorageFactory);

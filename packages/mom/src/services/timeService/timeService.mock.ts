@@ -1,4 +1,4 @@
-import { IoCContainer } from "@asimojs/asimo";
+import { factory } from "@asimojs/asimo";
 import { FakeTimeServiceController, IntervalId, TimeoutId, TimeService, TimeServiceIID } from "./timeService.types";
 
 const DEFAULT_DATE = "2025-01-01T12:00:00.000Z";
@@ -20,6 +20,10 @@ class FakeTimeService implements TimeService, FakeTimeServiceController {
     private initialTimeMs = 0;
     private intervalCount = 0;
     private nextCallback: CallBack | null = null;
+    readonly factory = factory({
+        provide: [TimeServiceIID],
+        load: async () => this,
+    });
 
     constructor(private currentTimeMs: number) {
         this.initialTimeMs = currentTimeMs;
@@ -182,16 +186,14 @@ class FakeTimeService implements TimeService, FakeTimeServiceController {
 }
 
 /**
- * Create a fake TimeService instance and register it in the IoC container
- * @param context the IoC Container
+ * Create a fake TimeService instance
  * @param now (optional) the current time (ms or date string) - e.g. 1756116157108 or "2025-08-01" default: "2025-01-01T12:00:00.000Z"
  */
-export function createFakeTimeService(context: IoCContainer, now?: number | string): FakeTimeServiceController {
+export function createFakeTimeService(now?: number | string): FakeTimeServiceController {
     let currentTimeMs = DEVAULT_NOW;
     if (now !== undefined) {
         currentTimeMs = typeof now === "number" ? now : new Date(now).getTime();
     }
     const service = new FakeTimeService(currentTimeMs);
-    context.registerService(TimeServiceIID, () => service);
     return service;
 }

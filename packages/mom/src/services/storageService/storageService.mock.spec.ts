@@ -1,10 +1,11 @@
-import { asm, createContainer, IoCContainer } from "@asimojs/asimo";
+import { Container, createContainer } from "@asimojs/asimo";
 import { describe, expect, it, beforeEach } from "vitest";
 import { createFakeStorageService } from "./storageService.mock";
 import { FakeStorageController, LocalStorageIID, SessionStorageIID, StorageService } from "./storageService.types";
+import { rootContext } from "@/mom";
 
 describe("Fake Storage Service", () => {
-    let context: IoCContainer,
+    let context: Container<any>,
         localStorageController: FakeStorageController,
         sessionStorageController: FakeStorageController,
         localStorage: StorageService,
@@ -14,9 +15,13 @@ describe("Fake Storage Service", () => {
         keyB = "keyB";
 
     beforeEach(async () => {
-        context = createContainer({ parent: asm, name: "test:fakeStorageService" });
-        localStorageController = createFakeStorageService(context, "local");
-        sessionStorageController = createFakeStorageService(context, "session");
+        localStorageController = createFakeStorageService("local");
+        sessionStorageController = createFakeStorageService("session");
+        context = createContainer({
+            name: "test:fakeStorageService",
+            extends: [rootContext],
+            services: [localStorageController.factory, sessionStorageController.factory],
+        });
         [localStorage, sessionStorage] = await context.fetch(LocalStorageIID, SessionStorageIID);
     });
 

@@ -1,18 +1,23 @@
-import { asm, createContainer, IoCContainer } from "@asimojs/asimo";
+import { Container, createContainer } from "@asimojs/asimo";
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { createFakeURLParamsService } from "./urlParamsService.mock";
 import { FakeURLParamsServiceController, URLParamsService, URLParamsServiceIID } from "./urlParamsService.types";
+import { rootContext } from "@/mom";
 
 describe("Fake URL Params Service", () => {
-    let context: IoCContainer, urlParamsController: FakeURLParamsServiceController, urlParamsService: URLParamsService;
+    let context: Container<any>, urlParamsController: FakeURLParamsServiceController, urlParamsService: URLParamsService;
 
     beforeEach(async () => {
         await init();
     });
 
     const init = async (initialParams?: { [name: string]: string }) => {
-        context = createContainer({ parent: asm, name: "test:fakeURLParamsService" });
-        urlParamsController = createFakeURLParamsService(context, initialParams);
+        urlParamsController = createFakeURLParamsService(initialParams);
+        context = createContainer({
+            name: "test:fakeURLParamsService",
+            extends: [rootContext],
+            services: [urlParamsController.factory],
+        });
         urlParamsService = await context.fetch(URLParamsServiceIID);
     };
 

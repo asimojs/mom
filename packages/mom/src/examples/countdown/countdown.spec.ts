@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { asm, createContainer, IoCContainer } from "@asimojs/asimo";
-import { disposeStore, createStore } from "@/mom";
+import { Container, createContainer } from "@asimojs/asimo";
+import { disposeStore, createStore, rootContext } from "@/mom";
 import { CountDown } from "./countdown";
 import { CountDownDef, CountDownStore } from "./countdown.types";
 import { createFakeTimeService } from "@/services/timeService/timeService.mock";
@@ -8,11 +8,15 @@ import { FakeTimeServiceController } from "@/services/timeService/timeService.ty
 
 // section#start
 describe("CountDown", () => {
-    let context: IoCContainer, store: CountDownStore, timeController: FakeTimeServiceController;
+    let context: Container<any>, store: CountDownStore, timeController: FakeTimeServiceController;
 
     beforeEach(() => {
-        context = createContainer({ parent: asm, name: "test:CountDown" });
-        timeController = createFakeTimeService(context);
+        timeController = createFakeTimeService();
+        context = createContainer({
+            extends: [rootContext],
+            name: "test:CountDown",
+            services: [timeController.factory],
+        });
     });
 
     afterEach(() => {
@@ -55,7 +59,6 @@ describe("CountDown", () => {
         // /section#defaultValues
 
         it("should throw an error if no TimeService is provided", async () => {
-            asm.logger = null; // prevent error to be logged on the console
             let error = "";
             try {
                 store = createStore({ $store: CountDown });
@@ -63,9 +66,8 @@ describe("CountDown", () => {
             } catch (ex) {
                 error = "" + ex;
             }
-            asm.logger = console;
             expect(error).toBe(
-                'Unexpected Store error during INIT: Error: ASM [/asm] Interface not found: "mom.services.TimeService"',
+                "Unexpected Store error during INIT: AsimoError: [Asimo] Service not found: mom.services.TimeService at /asm",
             );
         });
 

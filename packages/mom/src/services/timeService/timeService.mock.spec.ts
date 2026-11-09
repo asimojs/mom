@@ -1,17 +1,23 @@
-import { asm, createContainer, IoCContainer } from "@asimojs/asimo";
+import { Container, createContainer } from "@asimojs/asimo";
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { createFakeTimeService } from "./timeService.mock";
 import { FakeTimeServiceController, TimeService, TimeServiceIID } from "./timeService.types";
+import { rootContext } from "@/mom";
 
 describe("Fake Time Service", () => {
-    let context: IoCContainer,
+    let context: Container<any>,
         output = "",
         startTs = 0;
     let ftc: FakeTimeServiceController, ts: TimeService;
 
     beforeEach(() => {
         output = "";
-        context = createContainer({ parent: asm, name: "test:fakeTimeService" });
+        ftc = createFakeTimeService();
+        context = createContainer({
+            name: "test:fakeTimeService",
+            extends: [rootContext],
+            services: [ftc.factory],
+        });
     });
 
     const cbA = () => {
@@ -26,7 +32,12 @@ describe("Fake Time Service", () => {
 
     describe("Now", () => {
         it("should use the default date", async () => {
-            createFakeTimeService(context);
+            ftc = createFakeTimeService();
+            context = createContainer({
+                name: "test:fakeTimeService",
+                extends: [rootContext],
+                services: [ftc.factory],
+            });
             const ts = await context.fetch(TimeServiceIID);
             const defaultTs = new Date("2025-01-01T12:00:00.000Z").getTime();
             expect(ts.now).toBe(defaultTs);
@@ -34,7 +45,12 @@ describe("Fake Time Service", () => {
         });
 
         it("should use the date passed as argument", async () => {
-            createFakeTimeService(context, "2007-11-09");
+            ftc = createFakeTimeService("2007-11-09");
+            context = createContainer({
+                name: "test:fakeTimeService",
+                extends: [rootContext],
+                services: [ftc.factory],
+            });
             const ts = await context.fetch(TimeServiceIID);
             const d = new Date(ts.now);
             expect(d.toISOString()).toBe("2007-11-09T00:00:00.000Z");
@@ -44,7 +60,12 @@ describe("Fake Time Service", () => {
 
     describe("Intervals and Timeouts", () => {
         beforeEach(async () => {
-            ftc = createFakeTimeService(context);
+            ftc = createFakeTimeService();
+            context = createContainer({
+                name: "test:fakeTimeService",
+                extends: [rootContext],
+                services: [ftc.factory],
+            });
             ts = await context.fetch(TimeServiceIID);
             startTs = ts.now;
         });

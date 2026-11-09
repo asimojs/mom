@@ -1,4 +1,4 @@
-import { asyncIID } from "@asimojs/asimo";
+import { asyncIID, ServiceFactory } from "@asimojs/asimo";
 
 /**
  * Browser Storage wrapper (cf. window.localStorage and window.sessionStorage)
@@ -37,10 +37,12 @@ export interface StorageService {
     clear(): void;
 }
 
-export const LocalStorageIID = asyncIID<StorageService>("mom.services.LocalStorageIID");
-export const SessionStorageIID = asyncIID<StorageService>("mom.services.SessionStorageIID");
+export const LocalStorageIID = asyncIID<StorageService>()("mom.services.LocalStorageIID");
+export const SessionStorageIID = asyncIID<StorageService>()("mom.services.SessionStorageIID");
 
 export interface FakeStorageController {
+    /** Factory to create a child context providing this fake storage service */
+    readonly factory: ServiceFactory<[typeof LocalStorageIID]> | ServiceFactory<[typeof SessionStorageIID]>;
     /** Reset internal state */
     reset(): void;
 }

@@ -1,14 +1,19 @@
-import { asm, createContainer, IoCContainer } from "@asimojs/asimo";
+import { Container, createContainer } from "@asimojs/asimo";
 import { describe, expect, it, beforeEach } from "vitest";
 import { createFakeClipboardService } from "./clipboardService.mock";
 import { FakeClipboardServiceController, ClipboardServiceIID } from "./clipboardService.types";
+import { rootContext } from "@/mom";
 
 describe("Fake Clipboard Service", () => {
-    let context: IoCContainer, clipboardController: FakeClipboardServiceController;
+    let context: Container<any>, clipboardController: FakeClipboardServiceController;
 
     beforeEach(() => {
-        context = createContainer({ parent: asm, name: "test:fakeClipboardService" });
-        clipboardController = createFakeClipboardService(context);
+        clipboardController = createFakeClipboardService();
+        context = createContainer({
+            name: "test:fakeClipboardService",
+            extends: [rootContext],
+            services: [clipboardController.factory],
+        });
     });
 
     describe("Read", () => {
@@ -33,7 +38,12 @@ describe("Fake Clipboard Service", () => {
         });
 
         it("should return the clipboard content when set", async () => {
-            createFakeClipboardService(context, "Hello World");
+            clipboardController = createFakeClipboardService("Hello World");
+            context = createContainer({
+                name: "test:fakeClipboardService",
+                extends: [rootContext],
+                services: [clipboardController.factory],
+            });
             const clipboard = await context.fetch(ClipboardServiceIID);
             expect(await clipboard.readText()).toBe("Hello World");
             expect(await clipboard.readText()).toBe("Hello World"); // not changed after the 1st call

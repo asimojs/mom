@@ -1,6 +1,6 @@
-import { createStore, storeFactory } from "../mom";
+import { createStore, storeFactory, rootContext } from "@/mom";
 import { describe, expect, it } from "vitest";
-import { asm, createContainer, IoCContainer, syncIID } from "@asimojs/asimo";
+import { Container, createContainer, factory, syncIID } from "@asimojs/asimo";
 import { Store, storeIId } from "@/mom.types";
 
 interface TestDef {
@@ -15,18 +15,22 @@ interface TestDef {
 }
 type TestStore = Store<TestDef>;
 const TestStoreIID = storeIId<TestDef>("mom.tests.context.TestStore");
-const SomeConfigIID = syncIID<{ depth: number }>("mom.tests.context.SomeConfig");
+const SomeConfigIID = syncIID<{ depth: number }>()("mom.tests.context.SomeConfig");
 
 describe("Mom context", () => {
-    let storeContext: IoCContainer | null = null;
+    let storeContext: Container<any> | null = null;
 
     const TestStore = storeFactory(TestStoreIID, (m, params) => {
         const depth = params.depth ?? 1;
 
         storeContext = m.context;
 
-        m.createChildContext();
-        m.context.set(SomeConfigIID, { depth });
+        m.createChildContext([
+            factory({
+                provide: [SomeConfigIID],
+                load: () => ({ depth }),
+            }),
+        ]);
 
         m.makeAutoObservableModel({
             depth,
@@ -37,7 +41,7 @@ describe("Mom context", () => {
 
     describe("Store Factories", () => {
         it("should register test stores in asm", async () => {
-            const testStoreFactory = await asm.fetch(TestStoreIID, null);
+            const testStoreFactory = await rootContext.fetchOptional(TestStoreIID);
             expect(testStoreFactory).toBe(TestStore);
         });
 
@@ -55,13 +59,13 @@ describe("Mom context", () => {
         it("should use asm as default context", async () => {
             storeContext = null;
             const st1 = createStore({ $store: TestStore, depth: 0 });
-            expect(storeContext).toBe(asm);
-            expect(st1["#context"].path).toBe(asm.path);
+            expect(storeContext).toBe(rootContext);
+            expect(st1["#context"].path).toBe(rootContext.path);
         });
 
         it("should be possible to call createStore with $context", async () => {
-            const c2 = createContainer({ parent: asm, name: "c2" });
-            expect(c2).not.toBe(asm);
+            const c2 = createContainer({ extends: [rootContext], name: "c2" });
+            expect(c2).not.toBe(rootContext);
 
             storeContext = null;
             const st2 = createStore({ $store: TestStore, $context: c2, depth: 0 });
