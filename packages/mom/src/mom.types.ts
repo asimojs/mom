@@ -20,7 +20,7 @@ export type IIDType<T extends InterfaceId<any, any>> = T extends InterfaceId<inf
 export interface StoreFactory<D extends StoreDef<any, any>> {
     /** Component namespace (= IID namespace) */
     readonly "#namespace": string;
-    (m: StoreContext<D>, params: D["params"]): Store<D>;
+    (store: StoreContext<D>, params: D["params"]): Store<D>;
 }
 
 /**
@@ -35,14 +35,14 @@ export interface StoreContext<D extends StoreDef<any, any>> {
     context: Container<any>;
 
     /**
-     * Create a child context on the current m.context container.
-     * The m.context reference will be automatically changed to the new child context and
+     * Create a child context on the current store.context container.
+     * The store.context reference will be automatically changed to the new child context and
      * the child context name will the the store #id
      */
     createChildContext(services?: ServiceFactory<any, any>[]): void;
     /**
      * The store associated to this context.
-     * Note: the store is only defined after makeAutoObservableModel() has been called - null
+     * Note: the store is only defined after initModel() has been called - null
      * will be returned if the property is ready before
      */
     store: Store<D> | null;
@@ -52,7 +52,7 @@ export interface StoreContext<D extends StoreDef<any, any>> {
      * so all mobx features can be used here.
      * @see https://mobx.js.org/observable-state.html#makeautoobservable
      **/
-    makeAutoObservableModel(initialModel: D["model"] & { [key: `_${string}`]: any }): D["model"];
+    initModel(initialModel: D["model"] & { [key: `_${string}`]: any }): D["model"];
     /**
      * Create internal actions and observable state values that will not be exposed to the store users.
      * The store init() and dispose() methods should be defined here.
@@ -67,7 +67,7 @@ export interface StoreContext<D extends StoreDef<any, any>> {
      * This will:
      * - call the component init()
      * - set and update the component.$ready and component.$initiComplete properties
-     * e.g. model.myCpt = m.mount({$cpt: MyCpt, myprop:"hello"});
+     * e.g. model.myCpt = store.mount({$cpt: MyCpt, myprop:"hello"});
      **/
     mount<SD extends StoreDef<any, any>>(params: { $store: StoreFactory<SD> } & SD["params"]): Store<SD>;
     /**
@@ -77,7 +77,7 @@ export interface StoreContext<D extends StoreDef<any, any>> {
      * - set the component.$ready to false and change the component.$initComplete property
      * Note: this will not automatically detach the component (i.e. set its parent reference to null)
      * This will have to be done manually - e.g.
-     * model.myCpt = m.unmount(model.myCpt);
+     * model.myCpt = store.unmount(model.myCpt);
      * @param cpt
      * @return null
      */

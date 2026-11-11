@@ -1,4 +1,4 @@
-import { createStore, storeFactory } from "../mom";
+import { createStore, defineStore } from "../mom";
 import { describe, expect, it } from "vitest";
 import { Store } from "../mom.types";
 
@@ -16,23 +16,23 @@ describe("Mom mount+unmount", () => {
             };
         }
 
-        const LinkedListStore = storeFactory<LinkedListDef>((m, props) => {
-            const model = m.makeAutoObservableModel({
+        const LinkedListStore = defineStore<LinkedListDef>((store, props) => {
+            const model = store.initModel({
                 $value: props.value,
                 next: null,
                 createNext(v: string) {
                     if (!model.next) {
-                        model.next = m.mount({
+                        model.next = store.mount({
                             $store: LinkedListStore,
                             value: `${props.value}+${v}`,
                         });
                     }
                 },
                 deleteNext() {
-                    model.next = m.unmount(model.next);
+                    model.next = store.unmount(model.next);
                 },
             });
-            m.makeAutoObservableController({
+            store.makeAutoObservableController({
                 dispose() {
                     model.$value += "D";
                 },
@@ -106,17 +106,17 @@ describe("Mom mount+unmount", () => {
     //         next: RO<TestCptModel> | null;
     //     }
 
-    //     const TestCpt = mom.component<TestCptModel>((m, props) => {
+    //     const TestCpt = mom.component<TestCptModel>((store, props) => {
     //         const depth = props.depth;
     //         const model = m.createModel({
     //             initialModel: {
     //                 msg: "",
-    //                 next: depth > 0 ? m.mount({ $cpt: TestCpt, depth: depth - 1 }) : null,
+    //                 next: depth > 0 ? store.mount({ $cpt: TestCpt, depth: depth - 1 }) : null,
     //             },
     //             actions: {
     //                 reset() {
     //                     model.depth = 0;
-    //                     model.next = m.unmount(model.next);
+    //                     model.next = store.unmount(model.next);
     //                 },
     //             },
     //             init() {

@@ -1,11 +1,11 @@
-import { storeFactory } from "@/mom";
+import { defineStore } from "@/mom";
 import { CounterIID } from "./store.types";
 
 // section#main
-export const Counter = storeFactory(CounterIID, (m, params) => {
+export const Counter = defineStore(CounterIID, (store, params) => {
     const minFormatDigits = params.minFormatDigits ?? 2;
 
-    const model = m.makeAutoObservableModel({
+    const model = store.initModel({
         value: params.value ?? 0,
         get formattedValue() {
             // Format the counter with padding "0" at the start - e.g. "03"

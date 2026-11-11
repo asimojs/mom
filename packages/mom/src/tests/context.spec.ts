@@ -1,4 +1,4 @@
-import { createStore, storeFactory, rootContext } from "@/mom";
+import { createStore, defineStore, rootContext } from "@/mom";
 import { describe, expect, it } from "vitest";
 import { Container, createContainer, factory, syncIID } from "@asimojs/asimo";
 import { Store, storeIId } from "@/mom.types";
@@ -20,22 +20,22 @@ const SomeConfigIID = syncIID<{ depth: number }>()("mom.tests.context.SomeConfig
 describe("Mom context", () => {
     let storeContext: Container<any> | null = null;
 
-    const TestStore = storeFactory(TestStoreIID, (m, params) => {
+    const TestStore = defineStore(TestStoreIID, (store, params) => {
         const depth = params.depth ?? 1;
 
-        storeContext = m.context;
+        storeContext = store.context;
 
-        m.createChildContext([
+        store.createChildContext([
             factory({
                 provide: [SomeConfigIID],
                 load: () => ({ depth }),
             }),
         ]);
 
-        m.makeAutoObservableModel({
+        store.initModel({
             depth,
-            value: "value " + m.context.get(SomeConfigIID).depth,
-            subStore: depth < 1 ? null : m.mount({ $store: TestStore, depth: depth - 1 }),
+            value: "value " + store.context.get(SomeConfigIID).depth,
+            subStore: depth < 1 ? null : store.mount({ $store: TestStore, depth: depth - 1 }),
         });
     });
 

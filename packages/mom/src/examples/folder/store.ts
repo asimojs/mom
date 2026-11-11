@@ -1,12 +1,12 @@
-import { storeFactory } from "@/mom";
+import { defineStore } from "@/mom";
 import { FolderIID, FolderStore } from "./store.types";
 
 // section#main
-export const Folder = storeFactory(FolderIID, (m, params) => {
+export const Folder = defineStore(FolderIID, (store, params) => {
     const { data, parent, expanded = false } = params;
     let defaultChildExpanded = false;
 
-    const model = m.makeAutoObservableModel({
+    const model = store.initModel({
         name: data.name ?? "[Unnamed folder]",
         get path() {
             if (!parent) return `/`;
@@ -36,7 +36,7 @@ export const Folder = storeFactory(FolderIID, (m, params) => {
         },
     });
 
-    const controller = m.makeAutoObservableController({
+    const controller = store.makeAutoObservableController({
         loadCompleted: false,
         init() {
             this.loadSubFolders();
@@ -47,11 +47,11 @@ export const Folder = storeFactory(FolderIID, (m, params) => {
                 this.loadCompleted = true;
                 for (const dataFolder of data.folders ?? []) {
                     model.folders.push(
-                        // m.mount returns a new FolderStore instance
-                        m.mount({
+                        // store.mount returns a new FolderStore instance
+                        store.mount({
                             $store: Folder,
                             data: dataFolder,
-                            parent: m.store,
+                            parent: store.store,
                             expanded: defaultChildExpanded,
                         }),
                     );

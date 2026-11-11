@@ -1,4 +1,4 @@
-import { disposeStore, createStore, storeFactory } from "../mom";
+import { disposeStore, createStore, defineStore } from "../mom";
 import { beforeEach, describe, expect, it } from "vitest";
 import { runInAction } from "mobx";
 
@@ -18,8 +18,8 @@ describe("Mom init+dispose", () => {
     });
 
     describe("Autorun", () => {
-        const AutorunTest = storeFactory<TestDef>((m) => {
-            const model = m.makeAutoObservableModel({
+        const AutorunTest = defineStore<TestDef>((store) => {
+            const model = store.initModel({
                 value: "initial value",
                 msg1: "",
                 msg2: "",
@@ -30,7 +30,7 @@ describe("Mom init+dispose", () => {
                 },
             });
 
-            m.autorun(() => {
+            store.autorun(() => {
                 logs.push(`Model value: ${model.value}`);
             });
         });
@@ -55,8 +55,8 @@ describe("Mom init+dispose", () => {
 
     describe("Reactions", () => {
         // section#reaction
-        const ReactionTest = storeFactory<TestDef>((m) => {
-            const model = m.makeAutoObservableModel({
+        const ReactionTest = defineStore<TestDef>((store) => {
+            const model = store.initModel({
                 value: "initial value",
                 msg1: "",
                 msg2: "",
@@ -68,7 +68,7 @@ describe("Mom init+dispose", () => {
             });
 
             // reaction: (model.value) => model.msg1 (equivalent to a computed prop in this case)
-            m.reaction(
+            store.reaction(
                 () => {
                     if (model.value === "A") {
                         return "Value is A";
@@ -81,7 +81,7 @@ describe("Mom init+dispose", () => {
             );
 
             // reaction: (model.value, model.msg1) -> model.msg2 (equivalent to a computed prop in this case)
-            m.reaction(
+            store.reaction(
                 () => ({ v1: model.value, v2: model.msg1 }),
                 (data) => {
                     model.msg2 = `${data.v1}: ${data.v2}`;

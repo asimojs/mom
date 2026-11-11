@@ -1,13 +1,13 @@
-import { storeFactory } from "@/mom";
+import { defineStore } from "@/mom";
 import { CountDownIID } from "./store.types";
 import { runInAction } from "mobx";
 
 // Countdown implementation with no Dependency Inversion
 // section#main
-export const CountDown = storeFactory(CountDownIID, (m, params) => {
+export const CountDown = defineStore(CountDownIID, (store, params) => {
     const { initValue = 10, intervalMs = 1000, autoStart = false } = params;
 
-    const model = m.makeAutoObservableModel({
+    const model = store.initModel({
         value: initValue,
         get isRunning() {
             return controller.intervalId > 0;
@@ -41,7 +41,7 @@ export const CountDown = storeFactory(CountDownIID, (m, params) => {
         },
     });
 
-    const controller = m.makeAutoObservableController({
+    const controller = store.makeAutoObservableController({
         /** interval identifier created by setInterval() - 0 if not set */
         intervalId: 0,
         init() {

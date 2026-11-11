@@ -1,10 +1,10 @@
-import { storeFactory } from "@/mom";
+import { defineStore } from "@/mom";
 import { CounterListIID } from "./store.types";
 import { CounterStore } from "../counter/store.types";
 import { Counter } from "../counter/store";
 
-export const CounterList = storeFactory(CounterListIID, (m, params) => {
-    const model = m.makeAutoObservableModel({
+export const CounterList = defineStore(CounterListIID, (store, params) => {
+    const model = store.initModel({
         $defaultValue: 1,
         counters: [],
         get totalCount() {
@@ -13,14 +13,14 @@ export const CounterList = storeFactory(CounterListIID, (m, params) => {
 
         /** Add a new counter to the list */
         addCounter() {
-            model.counters.push(m.mount({ $store: Counter, value: model.$defaultValue }));
+            model.counters.push(store.mount({ $store: Counter, value: model.$defaultValue }));
         },
         /** Remove a counter */
         removeCounter(c: CounterStore) {
             const idx = model.counters.findIndex((v) => v === c);
             if (idx) {
                 const counter = model.counters[idx];
-                m.unmount(counter);
+                store.unmount(counter);
                 model.counters.splice(idx, 1);
             }
         },
@@ -30,7 +30,7 @@ export const CounterList = storeFactory(CounterListIID, (m, params) => {
         },
     });
 
-    m.makeAutoObservableController({
+    store.makeAutoObservableController({
         init() {
             const initialSize = params?.size ?? 0;
             for (let i = 0; initialSize > i; i++) {

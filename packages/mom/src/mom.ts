@@ -74,28 +74,28 @@ interface StoreInternalContext<SD extends StoreDef<any, any>> extends StoreConte
  * Create a Store factory
  * @param factory the store creation function
  */
-export function storeFactory<SD extends StoreDef<object, object>>(
-    createFn: (m: StoreContext<SD>, p: SD["params"]) => void,
+export function defineStore<SD extends StoreDef<object, object>>(
+    createFn: (store: StoreContext<SD>, p: SD["params"]) => void,
 ): StoreFactory<SD>;
 /**
  * Create a Store factory associated to a Store Interface Id (aka. IID)
  * @param storeIID the store interface id (creatred with storeIId())
  * @param createFn the store creation function
  */
-export function storeFactory<SD extends StoreDef<object, object>>(
+export function defineStore<SD extends StoreDef<object, object>>(
     storeIID: InterfaceId<StoreFactory<SD>> | string,
-    createFn: (m: StoreContext<SD>, p: SD["params"]) => void,
+    createFn: (store: StoreContext<SD>, p: SD["params"]) => void,
 ): StoreFactory<SD>;
 
-export function storeFactory<SD extends StoreDef<object, object>>(
-    storeIIDorFactory: InterfaceId<StoreFactory<SD>> | string | ((m: StoreContext<SD>, p: SD["params"]) => void),
-    createFn?: (m: StoreContext<SD>, p: SD["params"]) => void,
+export function defineStore<SD extends StoreDef<object, object>>(
+    storeIIDorFactory: InterfaceId<StoreFactory<SD>> | string | ((store: StoreContext<SD>, p: SD["params"]) => void),
+    createFn?: (store: StoreContext<SD>, p: SD["params"]) => void,
 ): StoreFactory<SD> {
     let storeIID: AsyncIID<StoreFactory<SD>> | null = null;
     let ns = "";
 
     if (typeof storeIIDorFactory === "function") {
-        createFn = storeIIDorFactory as (m: StoreContext<SD>, p: SD["params"]) => void;
+        createFn = storeIIDorFactory as (store: StoreContext<SD>, p: SD["params"]) => void;
     } else {
         if (typeof storeIIDorFactory === "string") {
             ns = storeIIDorFactory;
@@ -110,9 +110,9 @@ export function storeFactory<SD extends StoreDef<object, object>>(
         throw "Invalid Store Factory function";
     }
 
-    function stFactory(m: StoreContext<SD>, params: SD["params"]): Store<SD> {
-        createFn!(m, params); // TODO: try/catch
-        const mi = m as StoreInternalContext<SD>;
+    function stFactory(store: StoreContext<SD>, params: SD["params"]): Store<SD> {
+        createFn!(store, params); // TODO: try/catch
+        const mi = store as StoreInternalContext<SD>;
         processLifeCycleFunction("INIT", mi);
         return mi.store!;
     }
@@ -131,7 +131,7 @@ export function storeFactory<SD extends StoreDef<object, object>>(
 /**
  * Load a root store.
  * Note: if the store is a child of another store, then you should use
- * m.mount() in the parent store instead
+ * store.mount() in the parent store instead
  * @param params the store params
  * @returns the store instance
  */
@@ -161,7 +161,7 @@ export function createStore<SD extends StoreDef<object, object>>(
 
         if (mi.store === null) {
             // TODO: MomError
-            throw `[${stFactory["#namespace"]}] Invalid Component function: m.createModel() was not called`;
+            throw `[${stFactory["#namespace"]}] Invalid Component function: store.initModel() was not called`;
         }
 
         if (parent) {
@@ -203,10 +203,10 @@ export function createStore<SD extends StoreDef<object, object>>(
             rejectDispose: null,
             store: null as Store<SD> | null,
             reactionDisposers: null,
-            makeAutoObservableModel(initialModel: SD["model"]): SD["model"] {
+            initModel(initialModel: SD["model"]): SD["model"] {
                 if (createModelCalled) {
                     // TODO: MomError
-                    throw "Invalid Component function: m.createModel() must only be called once";
+                    throw "Invalid Component function: store.initModel() must only be called once";
                 }
                 if (!initialModel) {
                     // TODO: MomError
@@ -296,7 +296,7 @@ export function createStore<SD extends StoreDef<object, object>>(
             options: IAutorunOptions | IReactionOptions<any, any>,
         ) {
             if (!mi.store) {
-                throw `[${scope}] Reactions must be defined after makeAutoObservableModel()`;
+                throw `[${scope}] Reactions must be defined after initModel()`;
             }
             if (!options.name) {
                 const count = scope === "autorun" ? ++autoRunCount : ++reactionCount;
@@ -355,7 +355,7 @@ export function createStore<SD extends StoreDef<object, object>>(
 
 /**
  * Dispose a root store (created with createStore).
- * Note: child stores created with m.mount() should be disposed with m.unmount()
+ * Note: child stores created with store.mount() should be disposed with store.unmount()
  * @param store
  * @returns true if the store was propertly disposed
  */

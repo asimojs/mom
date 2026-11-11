@@ -1,11 +1,11 @@
-import { storeFactory } from "@/mom";
+import { defineStore } from "@/mom";
 import { FolderIID } from "./store.types";
 
 // section#main
-export const Folder = storeFactory(FolderIID, (m, params) => {
+export const Folder = defineStore(FolderIID, (store, params) => {
     const { data, parent, expanded = false } = params;
 
-    const model = m.makeAutoObservableModel({
+    const model = store.initModel({
         name: data.name ?? "[Unnamed folder]",
         get path() {
             if (!parent) return "/";
@@ -33,9 +33,9 @@ export const Folder = storeFactory(FolderIID, (m, params) => {
         },
     });
 
-    m.makeAutoObservableController({
+    store.makeAutoObservableController({
         init() {
-            model.folders = data.folders?.map((f) => m.mount({ $store: Folder, data: f, parent: m.store })) ?? [];
+            model.folders = data.folders?.map((f) => store.mount({ $store: Folder, data: f, parent: store.store })) ?? [];
         },
     });
 });

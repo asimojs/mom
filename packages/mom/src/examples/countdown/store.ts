@@ -1,15 +1,15 @@
-import { storeFactory } from "@/mom";
+import { defineStore } from "@/mom";
 import { CountDownIID } from "./store.types";
 import { runInAction } from "mobx";
 import { TimeService, TimeServiceIID } from "@/services/timeService/service.types";
 
 // Countdown implementation with Dependency Inversion on TimeService
 // section#main
-export const CountDown = storeFactory(CountDownIID, (m, params) => {
+export const CountDown = defineStore(CountDownIID, (store, params) => {
     const { initValue = 10, intervalMs = 1000, autoStart = false } = params;
     let timeService: TimeService | null = null;
 
-    const model = m.makeAutoObservableModel({
+    const model = store.initModel({
         value: initValue,
         get isRunning() {
             return controller.intervalId > 0;
@@ -41,11 +41,11 @@ export const CountDown = storeFactory(CountDownIID, (m, params) => {
         },
     });
 
-    const controller = m.makeAutoObservableController({
+    const controller = store.makeAutoObservableController({
         /** interval identifier created by setInterval() - 0 if not set */
         intervalId: 0,
         async init() {
-            timeService = await m.context.fetch(TimeServiceIID);
+            timeService = await store.context.fetch(TimeServiceIID);
             autoStart && model.start();
         },
         dispose() {
