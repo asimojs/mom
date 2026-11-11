@@ -19,14 +19,14 @@ describe("CountDown", () => {
 
     describe("Load", () => {
         it("should support default values", async () => {
-            store = createStore({ $store: CountDown });
+            store = createStore(CountDown);
             expect(store["#ready"]).toBe(true); // sync init
             expect(store.value).toBe(10);
             expect(store.isRunning).toBe(false);
         });
 
         it("should override default values", async () => {
-            store = createStore({ $store: CountDown, initValue: 5, intervalMs: 5 });
+            store = createStore(CountDown, { initValue: 5, intervalMs: 5 });
             expect(store["#ready"]).toBe(true); // sync init
             expect(store.value).toBe(5);
             expect(store.isRunning).toBe(false);
@@ -37,7 +37,7 @@ describe("CountDown", () => {
         });
 
         it("should support auto-start", async () => {
-            store = createStore({ $store: CountDown, initValue: 5, intervalMs: 5, autoStart: true });
+            store = createStore(CountDown, { initValue: 5, intervalMs: 5, autoStart: true });
             expect(store["#ready"]).toBe(true); // sync init
             expect(store.value).toBe(5);
             expect(store.isRunning).toBe(true); // auto-start
@@ -50,7 +50,7 @@ describe("CountDown", () => {
 
     describe("Actions", () => {
         it("should support start / stop (autoStart false)", async () => {
-            const store = createStore({ $store: CountDown, intervalMs: 5 });
+            const store = createStore(CountDown, { intervalMs: 5 });
             expect(store["#ready"]).toBe(true); // sync init
             expect(store.value).toBe(10);
             expect(store.isRunning).toBe(false);
@@ -78,7 +78,7 @@ describe("CountDown", () => {
         });
 
         it("should support start / stop (autoStart true)", async () => {
-            const store = createStore({ $store: CountDown, intervalMs: 5, autoStart: true });
+            const store = createStore(CountDown, { intervalMs: 5, autoStart: true });
             expect(store["#ready"]).toBe(true); // sync init
             expect(store.value).toBe(10);
 
@@ -104,7 +104,7 @@ describe("CountDown", () => {
         });
 
         it("should automatically stop the store at disposal", async () => {
-            const store = createStore({ $store: CountDown, intervalMs: 5, autoStart: true });
+            const store = createStore(CountDown, { intervalMs: 5, autoStart: true });
             expect(store.isRunning).toBe(true);
 
             disposeStore(store);

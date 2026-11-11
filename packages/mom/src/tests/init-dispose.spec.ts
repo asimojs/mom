@@ -33,7 +33,7 @@ describe("Mom init+dispose", () => {
 
         it("should set the store ready if no init", async () => {
             let initCompleteCount = 0;
-            const store = createStore({ $store: TestStoreA });
+            const store = createStore(TestStoreA);
             store["#initComplete"].then(() => {
                 initCompleteCount++;
             });
@@ -50,7 +50,7 @@ describe("Mom init+dispose", () => {
 
         it("should call init immediately after load", async () => {
             let initCompleteCount = 0;
-            const store = createStore({ $store: TestStoreB });
+            const store = createStore(TestStoreB);
             store["#initComplete"].then(() => {
                 initCompleteCount++;
             });
@@ -68,7 +68,7 @@ describe("Mom init+dispose", () => {
 
         it("should dispose stores with no explicit dispose methods", async () => {
             let diposeCompleteCount = 0;
-            const store = createStore({ $store: TestStoreA });
+            const store = createStore(TestStoreA);
             expect(store.value).toBe("initial value + after defineStore");
             store["#disposeComplete"].then(() => {
                 diposeCompleteCount++;
@@ -86,7 +86,7 @@ describe("Mom init+dispose", () => {
 
         it("should dispose stores with explicit dispose methods", async () => {
             let diposeCompleteCount = 0;
-            const store = createStore({ $store: TestStoreB });
+            const store = createStore(TestStoreB);
             expect(store.value).toBe("initial value + after defineStore + after init");
             store["#disposeComplete"].then(() => {
                 diposeCompleteCount++;
@@ -129,7 +129,7 @@ describe("Mom init+dispose", () => {
         });
 
         it("should handle #initComplete", async () => {
-            const store = createStore({ $store: TestStoreC });
+            const store = createStore(TestStoreC);
 
             expect(store.value).toBe("initial value + after defineStore + init start");
             expect(store["#ready"]).toBe(false);
@@ -141,7 +141,7 @@ describe("Mom init+dispose", () => {
         });
 
         it("should support terminate during init", async () => {
-            const store = createStore({ $store: TestStoreC });
+            const store = createStore(TestStoreC);
 
             expect(store["#ready"]).toBe(false);
             expect(store["#state"]).toBe("INITIALIZING");
@@ -156,7 +156,7 @@ describe("Mom init+dispose", () => {
         });
 
         it("should dispose after init complete", async () => {
-            const store = createStore({ $store: TestStoreC });
+            const store = createStore(TestStoreC);
             expect(store["#ready"]).toBe(false);
             await store["#initComplete"];
             expect(store["#ready"]).toBe(true);
@@ -194,7 +194,7 @@ describe("Mom init+dispose", () => {
         });
 
         it("should handle #initComplete", async () => {
-            const store = createStore({ $store: TestStoreC });
+            const store = createStore(TestStoreC);
 
             expect(store.value).toBe("initial value + after defineStore + init start");
             expect(store["#ready"]).toBe(false);
@@ -206,7 +206,7 @@ describe("Mom init+dispose", () => {
         });
 
         it("should support terminate during init", async () => {
-            const store = createStore({ $store: TestStoreC });
+            const store = createStore(TestStoreC);
 
             expect(store["#ready"]).toBe(false);
             expect(store["#state"]).toBe("INITIALIZING");
@@ -221,7 +221,7 @@ describe("Mom init+dispose", () => {
         });
 
         it("should dispose after init complete", async () => {
-            const store = createStore({ $store: TestStoreC });
+            const store = createStore(TestStoreC);
             expect(store["#ready"]).toBe(false);
             await store["#initComplete"];
             expect(store["#ready"]).toBe(true);

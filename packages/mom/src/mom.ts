@@ -136,10 +136,11 @@ export function defineStore<SD extends StoreDef<object, object>>(
  * @returns the store instance
  */
 export function createStore<SD extends StoreDef<object, object>>(
-    params: { $store: StoreFactory<SD>; $context?: Container<any> } & SD["params"],
+    storeFactory: StoreFactory<SD>,
+    params?: SD["params"] & { context?: Container<any> },
 ): Store<SD> {
     let rootCtxt: StoreInternalContext<any> | null = null;
-    const store = _createStore(null, params, params.$context ?? rootContext);
+    const store = _createStore(null, storeFactory, params ?? {} as SD["params"], params?.context ?? rootContext);
     (store as any).$dispose = () => {
         if (rootCtxt) {
             disposeCtxt(rootCtxt);
@@ -149,19 +150,17 @@ export function createStore<SD extends StoreDef<object, object>>(
 
     function _createStore(
         parent: StoreInternalContext<any> | null,
-        params: { $store: StoreFactory<SD> } & SD["params"],
+        storeFactory: StoreFactory<SD>,
+        params: SD["params"],
         context: Container<any>,
     ) {
-        const stFactory = params.$store;
-        params.$store = null as any;
+        const mi = createStoreInternalContext(parent, storeFactory, params, context);
 
-        const mi = createStoreInternalContext(parent, stFactory, params, context);
-
-        stFactory(mi, params); // TODO: try/catch
+        storeFactory(mi, params); // TODO: try/catch
 
         if (mi.store === null) {
             // TODO: MomError
-            throw `[${stFactory["#namespace"]}] Invalid Component function: store.initModel() was not called`;
+            throw `[${storeFactory["#namespace"]}] Invalid Component function: store.initModel() was not called`;
         }
 
         if (parent) {
@@ -262,8 +261,8 @@ export function createStore<SD extends StoreDef<object, object>>(
             createChildContext(services?: ServiceFactory<any, any>[]): void {
                 this.context = createContainer({ name: storeId, extends: [this.context], services });
             },
-            mount<SD extends StoreDef<any, any>>(params: { $store: StoreFactory<SD> } & SD["params"]): Store<SD> {
-                return _createStore(momCtxt, params, this.context);
+            mount<SD extends StoreDef<any, any>>(storeFactory: StoreFactory<SD>, params?: SD["params"]): Store<SD> {
+                return _createStore(momCtxt, storeFactory, params ?? {} as SD["params"], this.context);
             },
             unmount(store: Store<any> | null): null {
                 if (store) {

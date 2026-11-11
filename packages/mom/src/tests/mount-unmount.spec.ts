@@ -22,8 +22,7 @@ describe("Mom mount+unmount", () => {
                 next: null,
                 createNext(v: string) {
                     if (!model.next) {
-                        model.next = store.mount({
-                            $store: LinkedListStore,
+                        model.next = store.mount(LinkedListStore, {
                             value: `${props.value}+${v}`,
                         });
                     }
@@ -38,7 +37,7 @@ describe("Mom mount+unmount", () => {
         });
 
         it("should mount child components", async () => {
-            const store = createStore({ $store: LinkedListStore, value: "A" });
+            const store = createStore(LinkedListStore, { value: "A" });
 
             expect(store.$value).toBe("A");
             expect(store.next).toBe(null);
@@ -55,7 +54,7 @@ describe("Mom mount+unmount", () => {
         });
 
         it("should allow update of child component props", async () => {
-            const store = createStore({ $store: LinkedListStore, value: "A" });
+            const store = createStore(LinkedListStore, { value: "A" });
 
             store.createNext("B");
             expect(store.next?.$value).toBe("A+B");
@@ -66,7 +65,7 @@ describe("Mom mount+unmount", () => {
         });
 
         it("should dispose child components", async () => {
-            const a = createStore({ $store: LinkedListStore, value: "A" });
+            const a = createStore(LinkedListStore, { value: "A" });
             a.createNext("B");
             const b = a.next!;
             b.createNext("C");

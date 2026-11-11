@@ -13,7 +13,7 @@ export const CounterList = defineStore(CounterListIID, (store, params) => {
 
         /** Add a new counter to the list */
         addCounter() {
-            model.counters.push(store.mount({ $store: Counter, value: model.$defaultValue }));
+            model.counters.push(store.mount(Counter, { value: model.$defaultValue }));
         },
         /** Remove a counter */
         removeCounter(c: CounterStore) {

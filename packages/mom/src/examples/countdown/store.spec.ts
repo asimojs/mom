@@ -24,7 +24,7 @@ describe("CountDown", () => {
     });
 
     async function init(params?: CountDownDef["params"], awaitInitComplete = true) {
-        store = createStore({ $store: CountDown, $context: context, ...params });
+        store = createStore(CountDown, { context, ...params });
         if (awaitInitComplete) {
             await store["#initComplete"];
         }
@@ -61,7 +61,7 @@ describe("CountDown", () => {
         it("should throw an error if no TimeService is provided", async () => {
             let error = "";
             try {
-                store = createStore({ $store: CountDown });
+                store = createStore(CountDown);
                 await store["#initComplete"];
             } catch (ex) {
                 error = "" + ex;

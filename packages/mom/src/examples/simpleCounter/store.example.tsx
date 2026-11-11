@@ -4,7 +4,7 @@ import { SimpleCounterView } from "./store.view";
 import { useState } from "react";
 
 export const HelloSimpleCounter = () => {
-    const [store] = useState(() => createStore({ $store: SimpleCounter }));
+    const [store] = useState(() => createStore(SimpleCounter));
     return (
         <div>
             Simple Counter: <SimpleCounterView store={store} />

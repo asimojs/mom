@@ -35,7 +35,7 @@ describe("Mom context", () => {
         store.initModel({
             depth,
             value: "value " + store.context.get(SomeConfigIID).depth,
-            subStore: depth < 1 ? null : store.mount({ $store: TestStore, depth: depth - 1 }),
+            subStore: depth < 1 ? null : store.mount(TestStore, { depth: depth - 1 }),
         });
     });
 
@@ -46,7 +46,7 @@ describe("Mom context", () => {
         });
 
         it("should allow to create child context and pass them to child stores", async () => {
-            const st1 = createStore({ $store: TestStore });
+            const st1 = createStore(TestStore);
             expect(st1.value).toBe("value 1");
 
             expect(st1.subStore?.value).toBe("value 0");
@@ -58,17 +58,17 @@ describe("Mom context", () => {
     describe("createStore", () => {
         it("should use asm as default context", async () => {
             storeContext = null;
-            const st1 = createStore({ $store: TestStore, depth: 0 });
+            const st1 = createStore(TestStore, { depth: 0 });
             expect(storeContext).toBe(rootContext);
             expect(st1["#context"].path).toBe(rootContext.path);
         });
 
-        it("should be possible to call createStore with $context", async () => {
+        it("should be possible to call createStore with context", async () => {
             const c2 = createContainer({ extends: [rootContext], name: "c2" });
             expect(c2).not.toBe(rootContext);
 
             storeContext = null;
-            const st2 = createStore({ $store: TestStore, $context: c2, depth: 0 });
+            const st2 = createStore(TestStore, { context: c2, depth: 0 });
             expect(storeContext).toBe(c2);
             expect(c2.path).toBe("/asm/c2");
             expect(st2["#context"].path).toBe(c2.path); // can't compare refs as #context is a Proxy

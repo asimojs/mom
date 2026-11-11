@@ -34,7 +34,7 @@ export const Folder = defineStore(FolderIID, (store, params) => {
     });
 
     store.onInit(() => {
-        model.folders = data.folders?.map((f) => store.mount({ $store: Folder, data: f, parent: store.store })) ?? [];
+        model.folders = data.folders?.map((f) => store.mount(Folder, { data: f, parent: store.store })) ?? [];
     });
 });
 // /section#main

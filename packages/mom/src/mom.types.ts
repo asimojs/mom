@@ -77,7 +77,7 @@ export interface StoreContext<D extends StoreDef<any, any>> {
      * - set and update the component.$ready and component.$initiComplete properties
      * e.g. model.myCpt = store.mount({$cpt: MyCpt, myprop:"hello"});
      **/
-    mount<SD extends StoreDef<any, any>>(params: { $store: StoreFactory<SD> } & SD["params"]): Store<SD>;
+    mount<SD extends StoreDef<any, any>>(storeFactory: StoreFactory<SD>, params?: SD["params"]): Store<SD>;
     /**
      * Unmount a component - this will:
      * - recursively call the dispose methods of the component and child components

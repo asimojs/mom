@@ -6,6 +6,10 @@ export const Folder = defineStore(FolderIID, (store, params) => {
     const { data, parent, expanded = false } = params;
     let defaultChildExpanded = false;
 
+    const state = store.initState({
+        loadCompleted: false,
+    });
+
     const model = store.initModel({
         name: data.name ?? "[Unnamed folder]",
         get path() {
@@ -35,10 +39,6 @@ export const Folder = defineStore(FolderIID, (store, params) => {
             model.name = name;
         },
     });
-    
-    const state = store.initState({
-        loadCompleted: false,
-    });
 
     function loadSubFolders() {
         // only load the sub-folders if the folder is expanded
@@ -47,8 +47,7 @@ export const Folder = defineStore(FolderIID, (store, params) => {
             for (const dataFolder of data.folders ?? []) {
                 model.folders.push(
                     // store.mount returns a new FolderStore instance
-                    store.mount({
-                        $store: Folder,
+                    store.mount(Folder, {
                         data: dataFolder,
                         parent: store.store,
                         expanded: defaultChildExpanded,

@@ -5,7 +5,7 @@ import { useState } from "react";
 
 // section#main
 export const HelloCounter = () => {
-    const [store] = useState(() => createStore({ $store: Counter, value: 42, minFormatDigits: 3 }));
+    const [store] = useState(() => createStore(Counter, { value: 42, minFormatDigits: 3 }));
     return (
         <div>
             Basic Counter: <CounterView store={store} />

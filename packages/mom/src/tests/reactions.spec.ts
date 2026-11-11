@@ -36,7 +36,7 @@ describe("Mom init+dispose", () => {
         });
 
         it("should run when value changes and stop after dispose", async () => {
-            const store = createStore({ $store: AutorunTest });
+            const store = createStore(AutorunTest);
 
             expect(logs).toEqual(["Model value: initial value"]);
 
@@ -91,7 +91,7 @@ describe("Mom init+dispose", () => {
         // /section#reaction
 
         it("should run chain reactions and stop after dispose", async () => {
-            const store = createStore({ $store: ReactionTest });
+            const store = createStore(ReactionTest);
             expect(store.value).toBe("initial value");
             expect(store.msg1).toBe("Value is not A");
             expect(store.msg2).toBe("initial value: Value is not A");
