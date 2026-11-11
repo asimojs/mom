@@ -1,7 +1,7 @@
 import { Store, storeIId } from "@/mom.types";
 
-/** BasicCounter API Definition */
-type BasicCounterDef = {
+/** SimpleCounter API Definition */
+type SimpleCounterDef = {
     model: {
         /** The counter value - default: 1 */
         value: number;
@@ -10,5 +10,5 @@ type BasicCounterDef = {
     };
 };
 
-export type BasicCounterStore = Store<BasicCounterDef>;
-export const BasicCounterIID = storeIId<BasicCounterDef>("mom.examples.basicCounter");
+export type SimpleCounterStore = Store<SimpleCounterDef>;
+export const SimpleCounterIID = storeIId<SimpleCounterDef>("mom.examples.simpleCounter");
