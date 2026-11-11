@@ -1,6 +1,6 @@
 import { createStore } from "@/mom";
-import { Counter } from "./counter";
-import { CounterView } from "./counter.view";
+import { Counter } from "./store";
+import { CounterView } from "./store.view";
 import { useState } from "react";
 
 // section#main

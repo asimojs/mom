@@ -1,5 +1,5 @@
 import { storeFactory } from "@/mom";
-import { CounterIID } from "./counter.types";
+import { CounterIID } from "./store.types";
 
 // section#main
 export const Counter = storeFactory(CounterIID, (m, params) => {

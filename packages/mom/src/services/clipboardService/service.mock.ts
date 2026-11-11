@@ -1,5 +1,5 @@
 import { factory } from "@asimojs/asimo";
-import { ClipboardService, ClipboardServiceIID, FakeClipboardServiceController } from "./clipboardService.types";
+import { ClipboardService, ClipboardServiceIID, FakeClipboardServiceController } from "./service.types";
 import { createErrorCounter } from "../utils/errorCounter/errorCounter";
 
 class FakeClipboardService implements ClipboardService, FakeClipboardServiceController {

@@ -1,7 +1,7 @@
 import { Container, createContainer } from "@asimojs/asimo";
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { createFakeURLParamsService } from "./urlParamsService.mock";
-import { FakeURLParamsServiceController, URLParamsService, URLParamsServiceIID } from "./urlParamsService.types";
+import { createFakeURLParamsService } from "./service.mock";
+import { FakeURLParamsServiceController, URLParamsService, URLParamsServiceIID } from "./service.types";
 import { rootContext } from "@/mom";
 
 describe("Fake URL Params Service", () => {

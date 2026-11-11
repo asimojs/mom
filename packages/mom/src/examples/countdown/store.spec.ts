@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Container, createContainer } from "@asimojs/asimo";
 import { disposeStore, createStore, rootContext } from "@/mom";
-import { CountDown } from "./countdown";
-import { CountDownDef, CountDownStore } from "./countdown.types";
-import { createFakeTimeService } from "@/services/timeService/timeService.mock";
-import { FakeTimeServiceController } from "@/services/timeService/timeService.types";
+import { CountDown } from "./store";
+import { CountDownDef, CountDownStore } from "./store.types";
+import { createFakeTimeService } from "@/services/timeService/service.mock";
+import { FakeTimeServiceController } from "@/services/timeService/service.types";
 
 // section#start
 describe("CountDown", () => {

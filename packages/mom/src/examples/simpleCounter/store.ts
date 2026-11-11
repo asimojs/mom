@@ -1,5 +1,5 @@
 import { storeFactory } from "@/mom";
-import { SimpleCounterIID } from "./simpleCounter.types";
+import { SimpleCounterIID } from "./store.types";
 
 export const SimpleCounter = storeFactory(SimpleCounterIID, (m) => {
     const model = m.makeAutoObservableModel({

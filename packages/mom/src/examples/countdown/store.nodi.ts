@@ -1,5 +1,5 @@
 import { storeFactory } from "@/mom";
-import { CountDownIID } from "./countdown.types";
+import { CountDownIID } from "./store.types";
 import { runInAction } from "mobx";
 
 // Countdown implementation with no Dependency Inversion

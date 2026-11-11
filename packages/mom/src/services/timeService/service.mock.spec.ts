@@ -1,7 +1,7 @@
 import { Container, createContainer } from "@asimojs/asimo";
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { createFakeTimeService } from "./timeService.mock";
-import { FakeTimeServiceController, TimeService, TimeServiceIID } from "./timeService.types";
+import { createFakeTimeService } from "./service.mock";
+import { FakeTimeServiceController, TimeService, TimeServiceIID } from "./service.types";
 import { rootContext } from "@/mom";
 
 describe("Fake Time Service", () => {

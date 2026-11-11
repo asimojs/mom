@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Container, createContainer } from "@asimojs/asimo";
 import { disposeStore, createStore, rootContext } from "@/mom";
-import { CountDown } from "./countdown.nodi";
+import { CountDown } from "./store.nodi";
 import { pause } from "@/mom.mocks";
-import { CountDownStore } from "./countdown.types";
+import { CountDownStore } from "./store.types";
 
 describe("CountDown", () => {
     let context: Container<any>,

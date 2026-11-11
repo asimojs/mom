@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { FolderStore } from "./folder.types";
+import { FolderStore } from "./store.types";
 import { ViewProps } from "@/mom.types";
 
 // section#main

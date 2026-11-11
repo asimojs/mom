@@ -1,7 +1,7 @@
 import { Container, createContainer } from "@asimojs/asimo";
 import { describe, expect, it, beforeEach } from "vitest";
-import { createFakeStorageService } from "./storageService.mock";
-import { FakeStorageController, LocalStorageIID, SessionStorageIID, StorageService } from "./storageService.types";
+import { createFakeStorageService } from "./service.mock";
+import { FakeStorageController, LocalStorageIID, SessionStorageIID, StorageService } from "./service.types";
 import { rootContext } from "@/mom";
 
 describe("Fake Storage Service", () => {

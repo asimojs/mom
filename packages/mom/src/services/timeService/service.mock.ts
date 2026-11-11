@@ -1,5 +1,5 @@
 import { factory } from "@asimojs/asimo";
-import { FakeTimeServiceController, IntervalId, TimeoutId, TimeService, TimeServiceIID } from "./timeService.types";
+import { FakeTimeServiceController, IntervalId, TimeoutId, TimeService, TimeServiceIID } from "./service.types";
 
 const DEFAULT_DATE = "2025-01-01T12:00:00.000Z";
 const DEVAULT_NOW = new Date(DEFAULT_DATE).getTime();

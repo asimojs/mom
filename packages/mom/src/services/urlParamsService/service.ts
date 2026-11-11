@@ -1,6 +1,6 @@
 import { factory } from "@asimojs/asimo";
 import { registerRootService } from "@/mom";
-import { URLParamsService, URLParamsServiceIID } from "./urlParamsService.types";
+import { URLParamsService, URLParamsServiceIID } from "./service.types";
 
 const urlParmsService = {
     getURLParams: function (): Map<string, string> {

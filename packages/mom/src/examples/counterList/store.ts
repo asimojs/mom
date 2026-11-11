@@ -1,7 +1,7 @@
 import { storeFactory } from "@/mom";
-import { CounterListIID } from "./counterList.types";
-import { CounterStore } from "../counter/counter.types";
-import { Counter } from "../counter/counter";
+import { CounterListIID } from "./store.types";
+import { CounterStore } from "../counter/store.types";
+import { Counter } from "../counter/store";
 
 export const CounterList = storeFactory(CounterListIID, (m, params) => {
     const model = m.makeAutoObservableModel({

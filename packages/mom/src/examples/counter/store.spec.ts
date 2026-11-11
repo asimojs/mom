@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Container, createContainer } from "@asimojs/asimo";
 import { createStore, rootContext } from "@/mom";
-import { Counter } from "./counter";
-import { CounterIID } from "./counter.types";
+import { Counter } from "./store";
+import { CounterIID } from "./store.types";
 
 describe("Counter", () => {
     let context: Container<any>,

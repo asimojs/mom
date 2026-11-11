@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Container, createContainer } from "@asimojs/asimo";
 import { disposeStore, createStore, rootContext } from "@/mom";
-import { Folder } from "./folder";
-import { FolderStore, FolderData } from "./folder.types";
+import { Folder } from "./store";
+import { FolderStore, FolderData } from "./store.types";
 
 describe("Folder", () => {
     let context: Container<any>,

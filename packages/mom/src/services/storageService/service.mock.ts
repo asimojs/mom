@@ -1,5 +1,5 @@
 import { factory } from "@asimojs/asimo";
-import { FakeStorageController, LocalStorageIID, SessionStorageIID, StorageService } from "./storageService.types";
+import { FakeStorageController, LocalStorageIID, SessionStorageIID, StorageService } from "./service.types";
 
 class FakeStorageService implements StorageService, FakeStorageController {
     readonly factory: FakeStorageController["factory"];

@@ -1,6 +1,6 @@
 import { createStore } from "@/mom";
-import { SimpleCounter } from "./simpleCounter";
-import { SimpleCounterView } from "./simpleCounter.view";
+import { SimpleCounter } from "./store";
+import { SimpleCounterView } from "./store.view";
 import { useState } from "react";
 
 export const HelloSimpleCounter = () => {

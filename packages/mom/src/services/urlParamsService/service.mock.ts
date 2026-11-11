@@ -1,6 +1,6 @@
 import { factory } from "@asimojs/asimo";
-import { FakeURLParamsServiceController, URLParamsService, URLParamsServiceIID } from "./urlParamsService.types";
-import { paramsToMap } from "./urlParamsService";
+import { FakeURLParamsServiceController, URLParamsService, URLParamsServiceIID } from "./service.types";
+import { paramsToMap } from "./service";
 
 class FakeURLParamsService implements URLParamsService, FakeURLParamsServiceController {
     readonly factory = factory({

@@ -1,6 +1,6 @@
 import { factory } from "@asimojs/asimo";
 import { registerRootService } from "@/mom";
-import { ClipboardService, ClipboardServiceIID } from "./clipboardService.types";
+import { ClipboardService, ClipboardServiceIID } from "./service.types";
 
 export const clipboardService: ClipboardService = {
     writeText(newClipText: string): Promise<void> {

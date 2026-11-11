@@ -1,6 +1,6 @@
 import { factory } from "@asimojs/asimo";
 import { registerRootService } from "@/mom";
-import { LocalStorageIID, SessionStorageIID, StorageService } from "./storageService.types";
+import { LocalStorageIID, SessionStorageIID, StorageService } from "./service.types";
 
 class _Storage implements StorageService {
     constructor(private storage: Storage) {}

@@ -1,5 +1,5 @@
 import { storeFactory } from "@/mom";
-import { FolderIID, FolderStore } from "./folder.types";
+import { FolderIID, FolderStore } from "./store.types";
 
 // section#main
 export const Folder = storeFactory(FolderIID, (m, params) => {

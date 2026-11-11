@@ -1,7 +1,7 @@
 import { Container, createContainer } from "@asimojs/asimo";
 import { describe, expect, it, beforeEach } from "vitest";
-import { createFakeClipboardService } from "./clipboardService.mock";
-import { FakeClipboardServiceController, ClipboardServiceIID } from "./clipboardService.types";
+import { createFakeClipboardService } from "./service.mock";
+import { FakeClipboardServiceController, ClipboardServiceIID } from "./service.types";
 import { rootContext } from "@/mom";
 
 describe("Fake Clipboard Service", () => {
