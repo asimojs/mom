@@ -20,7 +20,7 @@ export const Folder = defineStore(FolderIID, (store, params) => {
         /** Change the expand value */
         expand(expanded: boolean) {
             model.isExpanded = expanded;
-            controller.loadSubFolders();
+            loadSubFolders();
         },
         /** Recursively expand or collapse the folder and its sub-folders */
         expandAll(expanded: boolean) {
@@ -35,29 +35,31 @@ export const Folder = defineStore(FolderIID, (store, params) => {
             model.name = name;
         },
     });
-
-    const controller = store.makeAutoObservableController({
+    
+    const state = store.initState({
         loadCompleted: false,
-        init() {
-            this.loadSubFolders();
-        },
-        loadSubFolders() {
-            // only load the sub-folders if the folder is expanded
-            if (!this.loadCompleted && model.isExpanded) {
-                this.loadCompleted = true;
-                for (const dataFolder of data.folders ?? []) {
-                    model.folders.push(
-                        // store.mount returns a new FolderStore instance
-                        store.mount({
-                            $store: Folder,
-                            data: dataFolder,
-                            parent: store.store,
-                            expanded: defaultChildExpanded,
-                        }),
-                    );
-                }
+    });
+
+    function loadSubFolders() {
+        // only load the sub-folders if the folder is expanded
+        if (!state.loadCompleted && model.isExpanded) {
+            state.loadCompleted = true;
+            for (const dataFolder of data.folders ?? []) {
+                model.folders.push(
+                    // store.mount returns a new FolderStore instance
+                    store.mount({
+                        $store: Folder,
+                        data: dataFolder,
+                        parent: store.store,
+                        expanded: defaultChildExpanded,
+                    }),
+                );
             }
-        },
+        }
+    }
+
+    store.onInit(() => {
+        loadSubFolders();
     });
 });
 // /section#main

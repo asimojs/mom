@@ -54,14 +54,22 @@ export interface StoreContext<D extends StoreDef<any, any>> {
      **/
     initModel(initialModel: D["model"] & { [key: `_${string}`]: any }): D["model"];
     /**
-     * Create internal actions and observable state values that will not be exposed to the store users.
-     * The store init() and dispose() methods should be defined here.
-     * Note: this method is a simple wrapper on the mobx makeAutoObservable function -
-     * so all mobx features can be used here.
+     * Create private observable state that will not be exposed to the store users.
+     * This method is a simple wrapper on the mobx makeAutoObservable function.
+     * Can only be called once per store.
      * @see https://mobx.js.org/observable-state.html#makeautoobservable
-     * @param actions
      */
-    makeAutoObservableController<A extends StoreInternalController>(actions: A): A;
+    initState<S extends object>(state: S): S;
+    /**
+     * Register a callback to be called when the store initializes (immediately after the store factory returns).
+     * Can only be called once per store.
+     */
+    onInit(fn: () => void | Promise<void>): void;
+    /**
+     * Register a callback to be called when the store is disposed/unmounted.
+     * Can only be called once per store.
+     */
+    onDispose(fn: () => void | Promise<void>): void;
     /**
      * Mount a child component that should be attached to the parent's model
      * This will:
@@ -102,10 +110,6 @@ export interface StoreContext<D extends StoreDef<any, any>> {
     ): IReactionDisposer;
 }
 
-export interface StoreInternalController {
-    init?(): void;
-    dispose?(): void;
-}
 
 /**
  * Default View props for a store React component

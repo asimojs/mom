@@ -1,5 +1,5 @@
 import { Container, AsyncIID, InterfaceId, ServiceFactory, createContainer, factory } from "@asimojs/asimo";
-import { StoreFactory, StoreContext, StoreDef, Store, StoreInternalController } from "./mom.types";
+import { StoreFactory, StoreContext, StoreDef, Store } from "./mom.types";
 import {
     autorun,
     IReactionDisposer,
@@ -186,6 +186,7 @@ export function createStore<SD extends StoreDef<object, object>>(
         context: Container<any>,
     ): StoreInternalContext<SD> {
         let createModelCalled = false;
+        let initStateCalled = false;
         let autoRunCount = 0;
         let reactionCount = 0;
         const ns = stFactory["#namespace"];
@@ -239,15 +240,24 @@ export function createStore<SD extends StoreDef<object, object>>(
                 this.store = makeAutoObservable(initialModel) as Store<SD>;
                 return this.store!;
             },
-            makeAutoObservableController<C extends StoreInternalController>(controller: C): C {
-                const ctl = makeAutoObservable(controller);
-                if (ctl.init) {
-                    this.init = ctl.init.bind(ctl);
+            initState<S extends object>(state: S): S {
+                if (initStateCalled) {
+                    throw "Invalid Component function: store.initState() must only be called once";
                 }
-                if (ctl.dispose) {
-                    this.dispose = ctl.dispose.bind(ctl);
+                initStateCalled = true;
+                return makeAutoObservable(state);
+            },
+            onInit(fn: () => void | Promise<void>): void {
+                if (this.init) {
+                    throw "Invalid Component function: store.onInit() must only be called once";
                 }
-                return ctl;
+                this.init = fn;
+            },
+            onDispose(fn: () => void | Promise<void>): void {
+                if (this.dispose) {
+                    throw "Invalid Component function: store.onDispose() must only be called once";
+                }
+                this.dispose = fn;
             },
             createChildContext(services?: ServiceFactory<any, any>[]): void {
                 this.context = createContainer({ name: storeId, extends: [this.context], services });

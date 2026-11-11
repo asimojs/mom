@@ -33,10 +33,8 @@ export const Folder = defineStore(FolderIID, (store, params) => {
         },
     });
 
-    store.makeAutoObservableController({
-        init() {
-            model.folders = data.folders?.map((f) => store.mount({ $store: Folder, data: f, parent: store.store })) ?? [];
-        },
+    store.onInit(() => {
+        model.folders = data.folders?.map((f) => store.mount({ $store: Folder, data: f, parent: store.store })) ?? [];
     });
 });
 // /section#main

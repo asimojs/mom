@@ -30,12 +30,10 @@ export const CounterList = defineStore(CounterListIID, (store, params) => {
         },
     });
 
-    store.makeAutoObservableController({
-        init() {
-            const initialSize = params?.size ?? 0;
-            for (let i = 0; initialSize > i; i++) {
-                model.addCounter();
-            }
-        },
+    store.onInit(() => {
+        const initialSize = params?.size ?? 0;
+        for (let i = 0; initialSize > i; i++) {
+            model.addCounter();
+        }
     });
 });

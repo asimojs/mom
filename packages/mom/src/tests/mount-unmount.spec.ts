@@ -32,10 +32,8 @@ describe("Mom mount+unmount", () => {
                     model.next = store.unmount(model.next);
                 },
             });
-            store.makeAutoObservableController({
-                dispose() {
-                    model.$value += "D";
-                },
+            store.onDispose(() => {
+                model.$value += "D";
             });
         });
 

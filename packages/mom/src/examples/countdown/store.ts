@@ -41,16 +41,17 @@ export const CountDown = defineStore(CountDownIID, (store, params) => {
         },
     });
 
-    const controller = store.makeAutoObservableController({
+    const controller = store.initState({
         /** interval identifier created by setInterval() - 0 if not set */
         intervalId: 0,
-        async init() {
-            timeService = await store.context.fetch(TimeServiceIID);
-            autoStart && model.start();
-        },
-        dispose() {
-            model.stop();
-        },
+    });
+
+    store.onInit(async () => {
+        timeService = await store.context.fetch(TimeServiceIID);
+        autoStart && model.start();
+    });
+    store.onDispose(() => {
+        model.stop();
     });
 });
 // /section#main

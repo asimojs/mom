@@ -21,14 +21,12 @@ describe("Mom init+dispose", () => {
             const model = store.initModel({
                 value: "initial value",
             });
-            store.makeAutoObservableController({
-                init() {
-                    // sync init
-                    model.value += " + after init";
-                },
-                dispose() {
-                    model.value += " + after dispose";
-                },
+            store.onInit(() => {
+                // sync init
+                model.value += " + after init";
+            });
+            store.onDispose(() => {
+                model.value += " + after dispose";
             });
             model.value += " + after defineStore";
         });
@@ -113,21 +111,19 @@ describe("Mom init+dispose", () => {
             const model = store.initModel({
                 value: "initial value",
             });
-            store.makeAutoObservableController({
-                async init() {
-                    model.value += " + init start";
-                    await Promise.resolve();
-                    runInAction(() => {
-                        model.value += " + after init";
-                    });
-                },
-                async dispose() {
-                    model.value += " + dispose start";
-                    await Promise.resolve();
-                    runInAction(() => {
-                        model.value += " + after dispose";
-                    });
-                },
+            store.onInit(async () => {
+                model.value += " + init start";
+                await Promise.resolve();
+                runInAction(() => {
+                    model.value += " + after init";
+                });
+            });
+            store.onDispose(async () => {
+                model.value += " + dispose start";
+                await Promise.resolve();
+                runInAction(() => {
+                    model.value += " + after dispose";
+                });
             });
             model.value += " + after defineStore";
         });
@@ -180,19 +176,19 @@ describe("Mom init+dispose", () => {
             const model = store.initModel({
                 value: "initial value",
             });
-            store.makeAutoObservableController({
-                *init() {
-                    model.value += " + init start";
-                    yield Promise.resolve();
-                    // no need for runInAction() here
+            store.onInit(async () => {
+                model.value += " + init start";
+                await Promise.resolve();
+                runInAction(() => {
                     model.value += " + after init";
-                },
-                *dispose() {
-                    model.value += " + dispose start";
-                    yield Promise.resolve();
-                    // no need for runInAction() here
+                });
+            });
+            store.onDispose(async () => {
+                model.value += " + dispose start";
+                await Promise.resolve();
+                runInAction(() => {
                     model.value += " + after dispose";
-                },
+                });
             });
             model.value += " + after defineStore";
         });
