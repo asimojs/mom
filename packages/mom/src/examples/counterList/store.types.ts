@@ -12,8 +12,8 @@ type CounterListDef = {
     model: {
         /** The sum of all counter values in the list */
         totalCount: number;
-        /** The value used when creating a new counter - can be changed dynamically */
-        $defaultValue: number;
+        /** The value used when creating a new counter */
+        defaultValue: number;
         /** The list of counters */
         counters: CounterStore[];
 

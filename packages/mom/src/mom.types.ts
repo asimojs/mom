@@ -74,15 +74,15 @@ export interface StoreContext<D extends StoreDef<any, any>> {
      * Mount a child component that should be attached to the parent's model
      * This will:
      * - call the component init()
-     * - set and update the component.$ready and component.$initiComplete properties
+     * - set and update the component #ready and #initComplete properties
      * e.g. model.myCpt = store.mount({$cpt: MyCpt, myprop:"hello"});
      **/
     mount<SD extends StoreDef<any, any>>(storeFactory: StoreFactory<SD>, params?: SD["params"]): Store<SD>;
     /**
      * Unmount a component - this will:
      * - recursively call the dispose methods of the component and child components
-     * - set the component.$disposed to true
-     * - set the component.$ready to false and change the component.$initComplete property
+     * - set the store #state to DISPOSED
+     * - set the store #ready to false
      * Note: this will not automatically detach the component (i.e. set its parent reference to null)
      * This will have to be done manually - e.g.
      * model.myCpt = store.unmount(model.myCpt);
@@ -115,7 +115,7 @@ export interface StoreContext<D extends StoreDef<any, any>> {
  * Default View props for a store React component
  */
 export interface ViewProps<S extends Store<any>> {
-    store: ReadOnlyExceptSingleDollar<S>;
+    store: DeepReadOnly<S>;
     className?: string;
 }
 
@@ -153,20 +153,12 @@ export interface StoreMetaData {
 }
 
 /** Define a Mom Model from its Params and State */
-export type Store<D extends StoreDef<any, any>> = ReadOnlyExceptSingleDollar<D["model"] & StoreMetaData>;
+export type Store<D extends StoreDef<any, any>> = DeepReadOnly<D["model"] & StoreMetaData>;
 
 /** Store definition type */
 export type StoreDef<Params extends object = {}, Model extends object = {}> = {
     params?: Params;
     model?: Model;
-};
-
-type ReadOnlyExceptSingleDollar<T> = {
-    // Writable: keys starting with exactly one $
-    [K in keyof T as K extends `$$${string}` ? never : K extends `$${string}` ? K : never]: T[K];
-} & {
-    // Readonly: all others (either don't start with $ or start with $$)
-    readonly [K in keyof T as K extends `$${string}` ? (K extends `$$${string}` ? K : never) : K]: DeepReadOnly<T[K]>;
 };
 
 /** DeepReadonly from https://stackoverflow.com/questions/41879327/deepreadonly-object-typescript */
@@ -175,7 +167,7 @@ type DeepReadOnly<T> = T extends (infer R)[]
     : T extends Function
     ? T
     : T extends object
-    ? ReadOnlyExceptSingleDollar<T>
+    ? { readonly [K in keyof T]: DeepReadOnly<T[K]> }
     : T;
 
-type ReadOnlyArray<T> = ReadonlyArray<ReadOnlyExceptSingleDollar<T>>;
+type ReadOnlyArray<T> = ReadonlyArray<DeepReadOnly<T>>;

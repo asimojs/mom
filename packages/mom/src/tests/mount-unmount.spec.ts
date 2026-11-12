@@ -9,7 +9,7 @@ describe("Mom mount+unmount", () => {
                 value: string;
             };
             model: {
-                $value: string; // rw prop
+                value: string;
                 next: Store<LinkedListDef> | null;
                 createNext(v: string): void;
                 deleteNext(): void;
@@ -18,7 +18,7 @@ describe("Mom mount+unmount", () => {
 
         const LinkedListStore = defineStore<LinkedListDef>((store, props) => {
             const model = store.initModel({
-                $value: props.value,
+                value: props.value,
                 next: null,
                 createNext(v: string) {
                     if (!model.next) {
@@ -32,36 +32,25 @@ describe("Mom mount+unmount", () => {
                 },
             });
             store.onDispose(() => {
-                model.$value += "D";
+                model.value += "D";
             });
         });
 
         it("should mount child components", async () => {
             const store = createStore(LinkedListStore, { value: "A" });
 
-            expect(store.$value).toBe("A");
+            expect(store.value).toBe("A");
             expect(store.next).toBe(null);
 
             store.createNext("B");
             expect(store.next?.["#ready"]).toBe(true);
-            expect(store.next?.$value).toBe("A+B");
+            expect(store.next?.value).toBe("A+B");
 
             expect(store["#id"]).not.toBe(store.next!["#id"]);
 
             store.next!.createNext("C");
-            expect(store.next!.next!.$value).toBe("A+B+C");
+            expect(store.next!.next!.value).toBe("A+B+C");
             expect(store.next!.next!.next).toBe(null);
-        });
-
-        it("should allow update of child component props", async () => {
-            const store = createStore(LinkedListStore, { value: "A" });
-
-            store.createNext("B");
-            expect(store.next?.$value).toBe("A+B");
-
-            store.next!.$value = "NEWVALUE"; // not readonly as it is a prop
-            // store.next = null; // not authorized: readonly
-            expect(store.next?.$value).toBe("NEWVALUE");
         });
 
         it("should dispose child components", async () => {
@@ -70,23 +59,23 @@ describe("Mom mount+unmount", () => {
             const b = a.next!;
             b.createNext("C");
             const c = b.next!;
-            expect(b.$value).toBe("A+B");
-            expect(c.$value).toBe("A+B+C");
+            expect(b.value).toBe("A+B");
+            expect(c.value).toBe("A+B+C");
 
             a.deleteNext();
             expect(a.next).toBe(null);
-            expect(a.$value).toBe("A");
+            expect(a.value).toBe("A");
             expect(a["#ready"]).toBe(true);
             expect(a["#state"]).toBe("READY");
 
             expect(b["#state"]).toBe("DISPOSED");
             expect(b["#ready"]).toBe(false);
-            expect(b.$value).toBe("A+BD");
+            expect(b.value).toBe("A+BD");
             expect(b.next).not.toBe(null);
 
             expect(c["#state"]).toBe("DISPOSED");
             expect(c["#ready"]).toBe(false);
-            expect(c.$value).toBe("A+B+CD");
+            expect(c.value).toBe("A+B+CD");
             expect(c.next).toBe(null);
         });
     });

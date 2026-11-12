@@ -5,7 +5,7 @@ import { Counter } from "../counter/store";
 
 export const CounterList = defineStore(CounterListIID, (store, params) => {
     const model = store.initModel({
-        $defaultValue: 1,
+        defaultValue: 1,
         counters: [],
         get totalCount() {
             return model.counters.reduce((count, counter) => count + counter.value, 0);
@@ -13,7 +13,7 @@ export const CounterList = defineStore(CounterListIID, (store, params) => {
 
         /** Add a new counter to the list */
         addCounter() {
-            model.counters.push(store.mount(Counter, { value: model.$defaultValue }));
+            model.counters.push(store.mount(Counter, { value: model.defaultValue }));
         },
         /** Remove a counter */
         removeCounter(c: CounterStore) {
