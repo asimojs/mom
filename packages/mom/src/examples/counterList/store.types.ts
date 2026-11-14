@@ -1,5 +1,5 @@
 import { Store, storeIId } from "@/mom.types";
-import { CounterStore } from "../counter/store.types";
+import { CounterStore } from "../counter/store";
 
 /** Store exposing a list of counters */
 type CounterListDef = {

@@ -1,13 +1,12 @@
 import { defineStore } from "@/mom";
-import { CounterIID } from "./store.types";
 
 // section#main
-export const Counter = defineStore(CounterIID, (store, params) => {
+export const Counter = defineStore((store, params: { value?: number; minFormatDigits?: number }) => {
     const minFormatDigits = params.minFormatDigits ?? 2;
 
     const model = store.initModel({
         value: params.value ?? 0,
-        get formattedValue() {
+        get formattedValue(): string {
             // Format the counter with padding "0" at the start - e.g. "03"
             return String(model.value).padStart(minFormatDigits, "0");
         },
@@ -21,5 +20,8 @@ export const Counter = defineStore(CounterIID, (store, params) => {
             model.value = value;
         },
     });
+    return model;
 });
 // /section#main
+
+export type CounterStore = ReturnType<typeof Counter>;

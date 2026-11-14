@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { CounterStore } from "./store.types";
+import { CounterStore } from "./store";
 import { ViewProps } from "@/mom.types";
 
 // section#main

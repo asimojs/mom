@@ -1,6 +1,6 @@
 import { defineStore } from "@/mom";
 import { CounterListIID } from "./store.types";
-import { CounterStore } from "../counter/store.types";
+import { CounterStore } from "../counter/store";
 import { Counter } from "../counter/store";
 
 export const CounterList = defineStore(CounterListIID, (store, params) => {

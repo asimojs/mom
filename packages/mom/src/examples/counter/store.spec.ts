@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { Container, createContainer } from "@asimojs/asimo";
 import { createStore, rootContext } from "@/mom";
 import { Counter } from "./store";
-import { CounterIID } from "./store.types";
 
 describe("Counter", () => {
     let context: Container<any>,
@@ -21,9 +20,8 @@ describe("Counter", () => {
         it("should support value prop", async () => {
             const counter = createStore(Counter, { value: 42, minFormatDigits: 3 });
 
-            expect(counter["#namespace"]).toBe(CounterIID.ns);
-            expect(counter["#namespace"]).toBe("mom.examples.counter");
-            expect(counter["#id"].match(/^mom\.examples\.counter\#(\d+)$/)?.[1]).not.toBeUndefined();
+            expect(counter["#namespace"]).toBe("");
+            expect(counter["#id"].match(/^\#(\d+)$/)?.[1]).not.toBeUndefined();
             expect(counter["#context"].name).toBe("asm"); // TODO
             expect(counter["#context"].path).toBe("/asm"); // TODO: /asm/test:Counter
             expect(counter.value).toBe(42);
@@ -33,7 +31,7 @@ describe("Counter", () => {
         it("should support no params", async () => {
             const counter = createStore(Counter);
 
-            expect(counter["#namespace"]).toBe(CounterIID.ns);
+            expect(counter["#namespace"]).toBe("");
             expect(counter["#context"].name).toBe("asm");
             expect(counter["#context"].path).toBe("/asm");
             expect(counter.value).toBe(0);

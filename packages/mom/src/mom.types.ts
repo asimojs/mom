@@ -12,7 +12,7 @@ export function storeIId<D extends StoreDef<any, any>>(ns: string) {
 }
 
 export type IIDType<T extends InterfaceId<any, any>> = T extends InterfaceId<infer IType, any> ? IType : never;
-// ex: let x: IIDType<typeof SimpleCounterIID>;
+// ex: let x: IIDType<typeof SomeStoreIID>;
 
 /**
  * Mom Store Factory - to instantitate Mom Stores

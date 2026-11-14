@@ -70,32 +70,47 @@ interface StoreInternalContext<SD extends StoreDef<any, any>> extends StoreConte
     rejectDispose: ((reason?: any) => void) | null;
 }
 
+/** StoreDef variant with required fields, for return-model type inference */
+type StoreDefR<P extends object, M extends object> = { params: P; model: M };
+/** StoreContext variant where initModel is independently generic, enabling M inference from return type */
+type InferredStoreContext<P extends object> = Omit<StoreContext<StoreDef<P, any>>, "initModel" | "store"> & {
+    initModel<M extends object>(initialModel: M): M;
+    store: any;
+};
+/**
+ * Create a Store factory that infers its model type from the return value of initModel.
+ * The factory function must return the result of store.initModel().
+ * @param createFn the store creation function that returns the model
+ */
+export function defineStore<P extends object, M extends object>(
+    createFn: (store: InferredStoreContext<P>, p: P) => M,
+): StoreFactory<StoreDefR<P, M>>;
 /**
  * Create a Store factory
- * @param factory the store creation function
+ * @param createFn the store creation function
  */
 export function defineStore<SD extends StoreDef<object, object>>(
     createFn: (store: StoreContext<SD>, p: SD["params"]) => void,
 ): StoreFactory<SD>;
 /**
  * Create a Store factory associated to a Store Interface Id (aka. IID)
- * @param storeIID the store interface id (creatred with storeIId())
+ * @param storeIID the store interface id (created with storeIId())
  * @param createFn the store creation function
  */
 export function defineStore<SD extends StoreDef<object, object>>(
     storeIID: InterfaceId<StoreFactory<SD>> | string,
-    createFn: (store: StoreContext<SD>, p: SD["params"]) => void,
+    createFn: (store: StoreContext<SD>, p: SD["params"]) => void | SD["model"],
 ): StoreFactory<SD>;
 
 export function defineStore<SD extends StoreDef<object, object>>(
-    storeIIDorFactory: InterfaceId<StoreFactory<SD>> | string | ((store: StoreContext<SD>, p: SD["params"]) => void),
-    createFn?: (store: StoreContext<SD>, p: SD["params"]) => void,
+    storeIIDorFactory: InterfaceId<StoreFactory<SD>> | string | ((store: StoreContext<SD>, p: SD["params"]) => any),
+    createFn?: (store: StoreContext<SD>, p: SD["params"]) => any,
 ): StoreFactory<SD> {
     let storeIID: AsyncIID<StoreFactory<SD>> | null = null;
     let ns = "";
 
     if (typeof storeIIDorFactory === "function") {
-        createFn = storeIIDorFactory as (store: StoreContext<SD>, p: SD["params"]) => void;
+        createFn = storeIIDorFactory as (store: StoreContext<SD>, p: SD["params"]) => any;
     } else {
         if (typeof storeIIDorFactory === "string") {
             ns = storeIIDorFactory;

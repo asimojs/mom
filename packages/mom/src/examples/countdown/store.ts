@@ -1,11 +1,19 @@
 import { defineStore } from "@/mom";
-import { CountDownIID } from "./store.types";
 import { runInAction } from "mobx";
 import { TimeService, TimeServiceIID } from "@/services/timeService/service.types";
 
+export type CountDownParams = {
+    /** The initial countdown counter value - default: 10 */
+    initValue?: number;
+    /** The countdown time interval in ms - default 1000 */
+    intervalMs?: number;
+    /** Tell if the countdown should automatically start at init */
+    autoStart?: boolean;
+};
+
 // Countdown implementation with Dependency Inversion on TimeService
 // section#main
-export const CountDown = defineStore(CountDownIID, (store, params) => {
+export const CountDown = defineStore((store, params: CountDownParams) => {
     const { initValue = 10, intervalMs = 1000, autoStart = false } = params;
     let timeService: TimeService | null = null;
 
@@ -53,5 +61,9 @@ export const CountDown = defineStore(CountDownIID, (store, params) => {
     store.onDispose(() => {
         model.stop();
     });
+
+    return model;
 });
 // /section#main
+
+export type CountDownStore = ReturnType<typeof CountDown>;

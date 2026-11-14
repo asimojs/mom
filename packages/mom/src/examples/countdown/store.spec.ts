@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Container, createContainer } from "@asimojs/asimo";
 import { disposeStore, createStore, rootContext } from "@/mom";
-import { CountDown } from "./store";
-import { CountDownDef, CountDownStore } from "./store.types";
+import { CountDown, CountDownParams, CountDownStore } from "./store";
 import { createFakeTimeService } from "@/services/timeService/service.mock";
 import { FakeTimeServiceController } from "@/services/timeService/service.types";
 
@@ -23,7 +22,7 @@ describe("CountDown", () => {
         store && disposeStore(store);
     });
 
-    async function init(params?: CountDownDef["params"], awaitInitComplete = true) {
+    async function init(params?: CountDownParams, awaitInitComplete = true) {
         store = createStore(CountDown, { context, ...params });
         if (awaitInitComplete) {
             await store["#initComplete"];

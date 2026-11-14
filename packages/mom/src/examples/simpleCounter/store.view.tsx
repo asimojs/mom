@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { SimpleCounterStore } from "./store.types";
+import { SimpleCounterStore } from "./store";
 import { ViewProps } from "@/mom.types";
 
 export const SimpleCounterView = observer(({ store, className }: ViewProps<SimpleCounterStore>) => {

@@ -3,7 +3,7 @@ import { Container, createContainer } from "@asimojs/asimo";
 import { disposeStore, createStore, rootContext } from "@/mom";
 import { CountDown } from "./store.nodi";
 import { pause } from "@/mom.mocks";
-import { CountDownStore } from "./store.types";
+import { CountDownStore } from "./store";
 
 describe("CountDown", () => {
     let context: Container<any>,
