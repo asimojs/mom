@@ -10,7 +10,7 @@ A parent store managing a dynamic list of child Counter stores, demonstrating **
 - Parent-child store hierarchy
 - Dynamic `store.mount()` and `store.unmount()`
 - Computed property aggregating child values (`totalCount`)
-- `#id` for React list keys
+- `$id` for React list keys
 
 ## Types
 
@@ -98,7 +98,7 @@ export const CounterListView = observer(({ store }: ViewProps<CounterListStore>)
         <button onClick={() => store.reset()}>Reset All</button>
 
         {store.counters.map((counter) => (
-            <div key={counter["#id"]}>
+            <div key={counter.$id}>
                 <CounterView store={counter} />
                 <button onClick={() => store.removeCounter(counter)}>Remove</button>
             </div>

@@ -32,7 +32,7 @@ const store = createStore(Counter, { value: 0 });
 // ... use the store ...
 
 disposeStore(store);
-// store["#state"] is now "DISPOSED"
+// store.$state is now "DISPOSED"
 ```
 
 ### In React with cleanup
@@ -57,12 +57,12 @@ function App() {
 1. Disposes all MobX reactions (autorun, reaction) registered on the store
 2. Recursively disposes all child stores (depth-first)
 3. Calls the store's `onDispose` callback (if any)
-4. Transitions `#state` through `DISPOSING` → `DISPOSED`
-5. Sets `#ready` to `false`
-6. Resolves the `#disposeComplete` promise
+4. Transitions `$state` through `DISPOSING` → `DISPOSED`
+5. Sets `$ready` to `false`
+6. Resolves the `$disposeComplete` promise
 
 ## Notes
 
 - Only works on root stores created with `createStore`. For child stores, use [`store.unmount()`](/mom/api-reference/store-context#unmount).
-- Disposal may be async if `onDispose` returns a promise. Use `await store["#disposeComplete"]` to wait.
+- Disposal may be async if `onDispose` returns a promise. Use `await store.$disposeComplete` to wait.
 - After disposal, model data can still be read but the store is no longer functional.

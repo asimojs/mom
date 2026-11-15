@@ -60,7 +60,6 @@ describe("Mom context", () => {
             storeContext = null;
             const st1 = createStore(TestStore, { depth: 0 });
             expect(storeContext).toBe(rootContext);
-            expect(st1["#context"].path).toBe(rootContext.path);
         });
 
         it("should be possible to call createStore with context", async () => {
@@ -71,7 +70,6 @@ describe("Mom context", () => {
             const st2 = createStore(TestStore, { context: c2, depth: 0 });
             expect(storeContext).toBe(c2);
             expect(c2.path).toBe("/asm/c2");
-            expect(st2["#context"].path).toBe(c2.path); // can't compare refs as #context is a Proxy
         });
     });
 });

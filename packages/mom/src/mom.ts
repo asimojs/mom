@@ -131,7 +131,7 @@ export function defineStore<SD extends StoreDef<object, object>>(
         processLifeCycleFunction("INIT", mi);
         return mi.store!;
     }
-    (stFactory as unknown as Writeable<StoreFactory<SD>>)["#namespace"] = ns;
+    (stFactory as unknown as Writeable<StoreFactory<SD>>).$namespace = ns;
     if (storeIID) {
         registerRootService(
             factory({
@@ -175,7 +175,7 @@ export function createStore<SD extends StoreDef<object, object>>(
 
         if (mi.store === null) {
             // TODO: MomError
-            throw `[${storeFactory["#namespace"]}] Invalid Component function: store.initModel() was not called`;
+            throw `[${storeFactory.$namespace}] Invalid Component function: store.initModel() was not called`;
         }
 
         if (parent) {
@@ -203,7 +203,7 @@ export function createStore<SD extends StoreDef<object, object>>(
         let initStateCalled = false;
         let autoRunCount = 0;
         let reactionCount = 0;
-        const ns = stFactory["#namespace"];
+        const ns = stFactory.$namespace;
         const storeId = `${ns}#${++storeCount}`;
 
         const momCtxt: StoreInternalContext<SD> = {
@@ -229,23 +229,22 @@ export function createStore<SD extends StoreDef<object, object>>(
                 }
                 const str = initialModel as Store<SD>;
                 const st: Writeable<Store<any>> = str;
-                st["#namespace"] = ns;
-                st["#id"] = storeId;
-                st["#context"] = parent?.context || context;
-                st["#ready"] = false;
-                st["#state"] = "INITIALIZING";
-                st["#initComplete"] = new Promise((resolve, reject) => {
+                st.$namespace = ns;
+                st.$id = storeId;
+                st.$ready = false;
+                st.$state = "INITIALIZING";
+                st.$initComplete = new Promise((resolve, reject) => {
                     momCtxt.resolveInit = () => {
-                        st["#state"] = "READY";
-                        st["#ready"] = true;
+                        st.$state = "READY";
+                        st.$ready = true;
                         resolve(undefined);
                     };
                     momCtxt.rejectInit = reject;
                 });
-                st["#disposeComplete"] = new Promise((resolve, reject) => {
+                st.$disposeComplete = new Promise((resolve, reject) => {
                     momCtxt.resolveDispose = () => {
-                        st["#state"] = "DISPOSED";
-                        st["#ready"] = false;
+                        st.$state = "DISPOSED";
+                        st.$ready = false;
                         resolve(undefined);
                     };
                     momCtxt.rejectDispose = reject;
@@ -324,7 +323,7 @@ export function createStore<SD extends StoreDef<object, object>>(
             }
             if (!options.name) {
                 const count = scope === "autorun" ? ++autoRunCount : ++reactionCount;
-                options.name = `${mi.store["#id"]}:${scope}:${count}`;
+                options.name = `${mi.store.$id}:${scope}:${count}`;
             }
             if (!options.onError) {
                 // TODO
@@ -356,9 +355,9 @@ export function createStore<SD extends StoreDef<object, object>>(
 
     function disposeCtxt(mi: StoreInternalContext<any>) {
         const model = mi.store as Writeable<Store<any>> | null;
-        if (!model || model["#state"] === "DISPOSED" || model["#state"] === "DISPOSING") return;
-        model["#state"] = "DISPOSING";
-        model["#ready"] = false;
+        if (!model || model.$state === "DISPOSED" || model.$state === "DISPOSING") return;
+        model.$state = "DISPOSING";
+        model.$ready = false;
 
         // dispose reactions
         if (mi.reactionDisposers) {

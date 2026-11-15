@@ -177,7 +177,7 @@ Test the form by exercising child stores through the parent:
 ```typescript
 it("should disable submit when fields are empty", async () => {
     const store = createStore(LoginForm);
-    await store["#initComplete"];
+    await store.$initComplete;
 
     expect(store.loginAction.disabled).toBe(true);
 

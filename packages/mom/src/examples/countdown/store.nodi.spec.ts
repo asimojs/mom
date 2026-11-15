@@ -20,14 +20,14 @@ describe("CountDown", () => {
     describe("Load", () => {
         it("should support default values", async () => {
             store = createStore(CountDown);
-            expect(store["#ready"]).toBe(true); // sync init
+            expect(store.$ready).toBe(true); // sync init
             expect(store.value).toBe(10);
             expect(store.isRunning).toBe(false);
         });
 
         it("should override default values", async () => {
             store = createStore(CountDown, { initValue: 5, intervalMs: 5 });
-            expect(store["#ready"]).toBe(true); // sync init
+            expect(store.$ready).toBe(true); // sync init
             expect(store.value).toBe(5);
             expect(store.isRunning).toBe(false);
 
@@ -38,7 +38,7 @@ describe("CountDown", () => {
 
         it("should support auto-start", async () => {
             store = createStore(CountDown, { initValue: 5, intervalMs: 5, autoStart: true });
-            expect(store["#ready"]).toBe(true); // sync init
+            expect(store.$ready).toBe(true); // sync init
             expect(store.value).toBe(5);
             expect(store.isRunning).toBe(true); // auto-start
 
@@ -51,7 +51,7 @@ describe("CountDown", () => {
     describe("Actions", () => {
         it("should support start / stop (autoStart false)", async () => {
             const store = createStore(CountDown, { intervalMs: 5 });
-            expect(store["#ready"]).toBe(true); // sync init
+            expect(store.$ready).toBe(true); // sync init
             expect(store.value).toBe(10);
             expect(store.isRunning).toBe(false);
 
@@ -79,7 +79,7 @@ describe("CountDown", () => {
 
         it("should support start / stop (autoStart true)", async () => {
             const store = createStore(CountDown, { intervalMs: 5, autoStart: true });
-            expect(store["#ready"]).toBe(true); // sync init
+            expect(store.$ready).toBe(true); // sync init
             expect(store.value).toBe(10);
 
             expect(store.isRunning).toBe(true);
@@ -108,9 +108,9 @@ describe("CountDown", () => {
             expect(store.isRunning).toBe(true);
 
             disposeStore(store);
-            await store["#disposeComplete"];
+            await store.$disposeComplete;
             expect(store.isRunning).toBe(false);
-            expect(store["#state"]).toBe("DISPOSED");
+            expect(store.$state).toBe("DISPOSED");
         });
     });
 });

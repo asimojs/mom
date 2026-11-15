@@ -34,7 +34,7 @@ describe("Folder", () => {
     describe("Load", () => {
         it("should support empty root stores", async () => {
             store = createStore(Folder, { data: {}, parent: null });
-            expect(store["#ready"]).toBe(true);
+            expect(store.$ready).toBe(true);
             expect(store.isExpanded).toBe(false);
             expect(store.name).toBe("[Unnamed folder]");
             expect(store.path).toBe("/");

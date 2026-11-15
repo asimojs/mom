@@ -70,7 +70,7 @@ packages/mom/src/
 - Store instance types: `CounterStore` (alias for `Store<CounterDef>`)
 - Factory constants: PascalCase (`Counter`)
 - Interface IDs: suffixed with `IID` (`CounterIID`, `TimeServiceIID`)
-- Store metadata properties use `#` prefix: `#id`, `#state`, `#ready`, `#namespace`
+- Store metadata properties use `$` prefix: `$id`, `$state`, `$ready`, `$namespace`
 
 ### Store Pattern
 

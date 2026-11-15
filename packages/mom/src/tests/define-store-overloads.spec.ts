@@ -17,7 +17,7 @@ describe("defineStore overloads", () => {
         it("should infer the model type and work correctly", async () => {
             const s = createStore(TestStore);
             expect(s.value).toBe("hello");
-            expect(s["#ready"]).toBe(true);
+            expect(s.$ready).toBe(true);
             s.upper();
             expect(s.value).toBe("HELLO");
             disposeStore(s);
@@ -57,7 +57,7 @@ describe("defineStore overloads", () => {
 
         it("should set the namespace correctly", async () => {
             const s = createStore(TestStore);
-            expect(s["#namespace"]).toBe("test.returnModel");
+            expect(s.$namespace).toBe("test.returnModel");
             expect(s.value).toBe(10);
             disposeStore(s);
         });
@@ -88,13 +88,13 @@ describe("defineStore overloads", () => {
 
         it("should run onInit and onDispose", async () => {
             const s = createStore(TestStore, { initial: "hi" });
-            await s["#initComplete"];
+            await s.$initComplete;
             expect(s.value).toBe("hi");
             expect(s.suffix).toBe("!");
             expect(s.isDisposed).toBe(false);
 
             disposeStore(s);
-            await s["#disposeComplete"];
+            await s.$disposeComplete;
             expect(s.isDisposed).toBe(true);
         });
     });
@@ -119,7 +119,7 @@ describe("defineStore overloads", () => {
         it("should mount and unmount child stores", async () => {
             const s = createStore(ParentStore);
             expect(s.child?.name).toBe("child1");
-            expect(s.child?.["#ready"]).toBe(true);
+            expect(s.child?.$ready).toBe(true);
 
             s.removeChild();
             expect(s.child).toBe(null);
@@ -144,7 +144,7 @@ describe("defineStore overloads", () => {
         it("should still work with explicit type parameter and void return", async () => {
             const s = createStore(TestStore);
             expect(s.value).toBe("legacy");
-            expect(s["#ready"]).toBe(true);
+            expect(s.$ready).toBe(true);
             disposeStore(s);
         });
     });

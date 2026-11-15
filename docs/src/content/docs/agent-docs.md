@@ -69,7 +69,7 @@ serviceName/
 | `XxxStore` | `CounterStore` | Public store type: `Store<XxxDef>` |
 | `XxxIID` | `CounterIID` | Store interface identifier |
 | PascalCase | `Counter` | Factory constant |
-| `#`-prefix | `#id`, `#ready` | Store metadata properties |
+| `$`-prefix | `$id`, `$ready` | Store metadata properties |
 
 ## Store pattern template
 
@@ -131,7 +131,7 @@ describe("MyFeature", () => {
 
     async function init(params = {}) {
         store = createStore(MyFeature, params);
-        await store["#initComplete"];
+        await store.$initComplete;
     }
 
     it("should work", async () => {

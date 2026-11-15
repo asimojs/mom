@@ -107,7 +107,7 @@ describe("Mom init+dispose", () => {
             expect(store.msg2).toBe("B: Value is not A");
 
             disposeStore(store);
-            expect(store["#ready"]).toBe(false);
+            expect(store.$ready).toBe(false);
             store.setValue("C");
             expect(store.value).toBe("C");
             expect(store.msg1).toBe("Value is not A"); // unchanged

@@ -143,7 +143,7 @@ export const FolderView = observer(({ store }: ViewProps<FolderStore>) => (
         {store.isExpanded && (
             <ul>
                 {store.folders.map((folder) => (
-                    <li key={folder["#id"]}>
+                    <li key={folder.$id}>
                         <FolderView store={folder} />
                     </li>
                 ))}
@@ -156,7 +156,7 @@ export const FolderView = observer(({ store }: ViewProps<FolderStore>) => (
 ));
 ```
 
-The `#id` metadata property provides a unique key for React lists.
+The `$id` metadata property provides a unique key for React lists.
 
 ## Unmounting child stores
 
@@ -167,7 +167,7 @@ To dynamically dispose a child store, use `store.unmount()`. It recursively disp
 model.myChild = store.unmount(model.myChild);
 ```
 
-After unmounting, the child store's `#state` transitions through `DISPOSING` → `DISPOSED`.
+After unmounting, the child store's `$state` transitions through `DISPOSING` → `DISPOSED`.
 
 ## Next
 

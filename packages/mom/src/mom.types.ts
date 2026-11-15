@@ -19,7 +19,7 @@ export type IIDType<T extends InterfaceId<any, any>> = T extends InterfaceId<inf
  */
 export interface StoreFactory<D extends StoreDef<any, any>> {
     /** Component namespace (= IID namespace) */
-    readonly "#namespace": string;
+    readonly $namespace: string;
     (store: StoreContext<D>, params: D["params"]): Store<D>;
 }
 
@@ -37,7 +37,7 @@ export interface StoreContext<D extends StoreDef<any, any>> {
     /**
      * Create a child context on the current store.context container.
      * The store.context reference will be automatically changed to the new child context and
-     * the child context name will the the store #id
+     * the child context name will the the store $id
      */
     createChildContext(services?: ServiceFactory<any, any>[]): void;
     /**
@@ -74,15 +74,15 @@ export interface StoreContext<D extends StoreDef<any, any>> {
      * Mount a child component that should be attached to the parent's model
      * This will:
      * - call the component init()
-     * - set and update the component #ready and #initComplete properties
+     * - set and update the component $ready and $initComplete properties
      * e.g. model.myCpt = store.mount({$cpt: MyCpt, myprop:"hello"});
      **/
     mount<SD extends StoreDef<any, any>>(storeFactory: StoreFactory<SD>, params?: SD["params"]): Store<SD>;
     /**
      * Unmount a component - this will:
      * - recursively call the dispose methods of the component and child components
-     * - set the store #state to DISPOSED
-     * - set the store #ready to false
+     * - set the store $state to DISPOSED
+     * - set the store $ready to false
      * Note: this will not automatically detach the component (i.e. set its parent reference to null)
      * This will have to be done manually - e.g.
      * model.myCpt = store.unmount(model.myCpt);
@@ -96,7 +96,7 @@ export interface StoreContext<D extends StoreDef<any, any>> {
     terminate(): void;
     /**
      * Wrapper on mobx' autorun to ensure that the reaction is automatically diposed with the store
-     * By default a unique name associated to the store #id will be added to the options
+     * By default a unique name associated to the store $id will be added to the options
      * The error will be also redirected to the mom logger
      * @param effect the effect function
      * @param options
@@ -133,23 +133,21 @@ type StoreState = "INITIALIZING" | "READY" | "DISPOSING" | "DISPOSED";
  */
 export interface StoreMetaData {
     /** The store namespace */
-    readonly "#namespace": string;
+    readonly $namespace: string;
     /**
      * A unique id associated to the store - composed from the concatenation of the namespace with a unique number,
      * separated with a #
      * @example "mom.example.counter#3"
      */
-    readonly "#id": string;
-    /** The context associated to the store - allows to share or retrieve dependencies */
-    readonly "#context": Container<any>;
+    readonly $id: string;
     /** The store life cycle state from INITIALIZING to DISPOSED */
-    readonly "#state": StoreState;
+    readonly $state: StoreState;
     /** True when the store state is READY */
-    readonly "#ready": boolean;
+    readonly $ready: boolean;
     /** Promise resolving when initialization is complete and when the store is NOT disposed */
-    readonly "#initComplete": Promise<void>;
+    readonly $initComplete: Promise<void>;
     /** Promise resolving when dispose is complete */
-    readonly "#disposeComplete": Promise<void>;
+    readonly $disposeComplete: Promise<void>;
 }
 
 /** Define a Mom Model from its Params and State */

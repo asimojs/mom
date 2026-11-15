@@ -45,7 +45,7 @@ export const CounterView = observer(({ store }: ViewProps<CounterStore>) => (
 ));
 ```
 
-This component re-renders when `store.formattedValue` changes, but **not** when other properties change (e.g. `store["#ready"]`). Parent components are also unaffected — only components that read changed observables re-render. This fine-grained reactivity is what makes MobX performant in large component trees.
+This component re-renders when `store.formattedValue` changes, but **not** when other properties change (e.g. `store.$ready`). Parent components are also unaffected — only components that read changed observables re-render. This fine-grained reactivity is what makes MobX performant in large component trees.
 
 ## `store.autorun()`
 
@@ -95,7 +95,7 @@ Avoid dependency loops in reactions — if A computes from B which computes from
 
 Mom enhances MobX's autorun and reaction with sensible defaults:
 
-- **Auto-naming** — each reaction gets a name based on the store `#id` (e.g. `myapp.counter#5:autorun:1`)
+- **Auto-naming** — each reaction gets a name based on the store `$id` (e.g. `myapp.counter#5:autorun:1`)
 - **Error logging** — errors in reactions are automatically reported with the store id
 - **`fireImmediately: true`** — `store.reaction()` fires immediately by default (unlike plain MobX), so it behaves consistently with `autorun` and computed properties
 - **Auto-disposal** — all reactions are disposed when the store is disposed

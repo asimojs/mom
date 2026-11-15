@@ -7,7 +7,7 @@ Stores need to run code at creation (e.g. fetch data) and disposal (e.g. clean u
 
 ## Lifecycle states
 
-Each store instance transitions through four states, exposed via the `#state` property:
+Each store instance transitions through four states, exposed via the `$state` property:
 
 ```
 INITIALIZING → READY → DISPOSING → DISPOSED
@@ -20,11 +20,11 @@ INITIALIZING → READY → DISPOSING → DISPOSED
 | `DISPOSING` | Disposal has started (may be async) |
 | `DISPOSED` | Fully disposed — references should be removed |
 
-The `#ready` boolean is a convenience shorthand — `true` when `#state` is `"READY"`:
+The `$ready` boolean is a convenience shorthand — `true` when `$state` is `"READY"`:
 
 ```tsx
 export const MyStoreView = observer(({ store }: ViewProps<MyStore>) => {
-    if (!store["#ready"]) return <div>Loading...</div>;
+    if (!store.$ready) return <div>Loading...</div>;
     return <div>{/* ready content */}</div>;
 });
 ```
@@ -70,7 +70,7 @@ export const CountDown = defineStore(CountDownIID, (store, params) => {
 
 ### Why `onInit` runs *after* the factory
 
-Mom always creates the store synchronously so the view can render immediately — even before async initialization completes. When `onInit` is synchronous, the store transitions to `READY` before the first render. When it's async, the store starts in `INITIALIZING` and the view should check `#ready`.
+Mom always creates the store synchronously so the view can render immediately — even before async initialization completes. When `onInit` is synchronous, the store transitions to `READY` before the first render. When it's async, the store starts in `INITIALIZING` and the view should check `$ready`.
 
 ## Private state with `initState`
 
@@ -105,27 +105,26 @@ Two promise properties let you wait for lifecycle transitions:
 
 ```typescript
 // Wait for init to complete
-await store["#initComplete"];
+await store.$initComplete;
 
 // Wait for full disposal
-await store["#disposeComplete"];
+await store.$disposeComplete;
 ```
 
 These are useful in tests and when parent stores need to coordinate with child store readiness.
 
 ## Store metadata recap
 
-Every store exposes these `#`-prefixed metadata properties:
+Every store exposes these `$`-prefixed metadata properties:
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `#state` | `"INITIALIZING" \| "READY" \| "DISPOSING" \| "DISPOSED"` | Current lifecycle state |
-| `#ready` | `boolean` | `true` when `#state` is `"READY"` |
-| `#initComplete` | `Promise<void>` | Resolves when init completes |
-| `#disposeComplete` | `Promise<void>` | Resolves when disposal completes |
-| `#namespace` | `string` | The IID namespace (e.g. `"myapp.counter"`) |
-| `#id` | `string` | Unique instance id (e.g. `"myapp.counter#42"`) |
-| `#context` | `Container<any>` | The store's IoC container |
+| `$state` | `"INITIALIZING" \| "READY" \| "DISPOSING" \| "DISPOSED"` | Current lifecycle state |
+| `$ready` | `boolean` | `true` when `$state` is `"READY"` |
+| `$initComplete` | `Promise<void>` | Resolves when init completes |
+| `$disposeComplete` | `Promise<void>` | Resolves when disposal completes |
+| `$namespace` | `string` | The IID namespace (e.g. `"myapp.counter"`) |
+| `$id` | `string` | Unique instance id (e.g. `"myapp.counter#42"`) |
 
 ## Next
 

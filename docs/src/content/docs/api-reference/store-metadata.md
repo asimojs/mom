@@ -1,24 +1,24 @@
 ---
 title: Store Metadata
-description: "#id, #namespace, #state, #ready, #initComplete, #disposeComplete, #context"
+description: "$id, $namespace, $state, $ready, $initComplete, $disposeComplete"
 ---
 
-Every store instance includes metadata properties prefixed with `#` to avoid collisions with model properties. These are defined by the `StoreMetaData` interface.
+Every store instance includes metadata properties prefixed with `$` to avoid collisions with model properties. These are defined by the `StoreMetaData` interface.
 
 ## Properties
 
-### `#namespace`
+### `$namespace`
 
 ```typescript
-readonly "#namespace": string
+readonly "$namespace": string
 ```
 
 The namespace from the store's IID (e.g. `"myapp.counter"`). Empty string if no IID was provided to `defineStore`.
 
-### `#id`
+### `$id`
 
 ```typescript
-readonly "#id": string
+readonly "$id": string
 ```
 
 A unique instance identifier combining the namespace with a sequential counter:
@@ -31,18 +31,10 @@ A unique instance identifier combining the namespace with a sequential counter:
 
 Useful as a React `key` in lists and for debugging.
 
-### `#context`
+### `$state`
 
 ```typescript
-readonly "#context": Container<any>
-```
-
-The IoC container associated with this store. Same as the parent's context unless overridden with `createChildContext` or a custom context in `createStore`.
-
-### `#state`
-
-```typescript
-readonly "#state": "INITIALIZING" | "READY" | "DISPOSING" | "DISPOSED"
+readonly "$state": "INITIALIZING" | "READY" | "DISPOSING" | "DISPOSED"
 ```
 
 The current lifecycle state:
@@ -54,57 +46,56 @@ The current lifecycle state:
 | `DISPOSING` | Disposal started, may be async |
 | `DISPOSED` | Fully disposed, no longer functional |
 
-### `#ready`
+### `$ready`
 
 ```typescript
-readonly "#ready": boolean
+readonly "$ready": boolean
 ```
 
-`true` when `#state` is `"READY"`, `false` otherwise. Convenience property for view components:
+`true` when `$state` is `"READY"`, `false` otherwise. Convenience property for view components:
 
 ```tsx
-if (!store["#ready"]) return <div>Loading...</div>;
+if (!store.$ready) return <div>Loading...</div>;
 ```
 
-### `#initComplete`
+### `$initComplete`
 
 ```typescript
-readonly "#initComplete": Promise<void>
+readonly "$initComplete": Promise<void>
 ```
 
 Resolves when the store transitions from `INITIALIZING` to `READY`. Useful in tests:
 
 ```typescript
 const store = createStore(MyStore);
-await store["#initComplete"];
-expect(store["#ready"]).toBe(true);
+await store.$initComplete;
+expect(store.$ready).toBe(true);
 ```
 
-### `#disposeComplete`
+### `$disposeComplete`
 
 ```typescript
-readonly "#disposeComplete": Promise<void>
+readonly "$disposeComplete": Promise<void>
 ```
 
 Resolves when the store transitions to `DISPOSED`:
 
 ```typescript
 disposeStore(store);
-await store["#disposeComplete"];
-expect(store["#state"]).toBe("DISPOSED");
+await store.$disposeComplete;
+expect(store.$state).toBe("DISPOSED");
 ```
 
 ## Access syntax
 
-Because the property names start with `#`, they must be accessed with bracket notation:
+The `$`-prefixed metadata properties are accessed with dot notation:
 
 ```typescript
-store["#id"]           // ✓
-store["#ready"]        // ✓
-store["#state"]        // ✓
-store.#id              // ✗ TypeScript private field syntax, not the same thing
+store.$id           // ✓
+store.$ready        // ✓
+store.$state        // ✓
 ```
 
 ## Observability
 
-`#state` and `#ready` are **MobX observable** — views wrapped with `observer` will re-render when they change. The other metadata properties (`#id`, `#namespace`, `#context`) are set once at creation and don't change.
+`$state` and `$ready` are **MobX observable** — views wrapped with `observer` will re-render when they change. The other metadata properties (`$id`, `$namespace`) are set once at creation and don't change.

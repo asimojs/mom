@@ -19,7 +19,7 @@ export const FolderView = observer(({ store, className }: ViewProps<FolderStore>
             {store.isExpanded && (
                 <ul className="p-2">
                     {store.folders.map((folder) => (
-                        <li key={folder["#id"]}>
+                        <li key={folder.$id}>
                             <FolderView store={folder} />
                         </li>
                     ))}

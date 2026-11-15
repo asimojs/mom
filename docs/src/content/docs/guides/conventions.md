@@ -71,15 +71,14 @@ export const TextInput = defineStore((store, params) => { /* ... */ });
 
 ### Metadata properties
 
-Store metadata uses the `#` prefix to avoid collisions with model properties:
+Store metadata uses the `$` prefix to avoid collisions with model properties:
 
-- `#id` — unique instance identifier (e.g. `"myapp.counter#42"`)
-- `#namespace` — IID namespace (e.g. `"myapp.counter"`)
-- `#state` — lifecycle state
-- `#ready` — boolean shorthand for `#state === "READY"`
-- `#initComplete` — promise for init completion
-- `#disposeComplete` — promise for dispose completion
-- `#context` — IoC container reference
+- `$id` — unique instance identifier (e.g. `"myapp.counter#42"`)
+- `$namespace` — IID namespace (e.g. `"myapp.counter"`)
+- `$state` — lifecycle state
+- `$ready` — boolean shorthand for `$state === "READY"`
+- `$initComplete` — promise for init completion
+- `$disposeComplete` — promise for dispose completion
 
 ### IID namespaces
 

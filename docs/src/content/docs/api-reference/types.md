@@ -39,12 +39,12 @@ export type CounterStore = Store<CounterDef>;
 
 ```typescript
 interface StoreFactory<D extends StoreDef<any, any>> {
-    readonly "#namespace": string;
+    readonly "$namespace": string;
     (store: StoreContext<D>, params: D["params"]): Store<D>;
 }
 ```
 
-A callable factory produced by `defineStore`. The `#namespace` property holds the IID namespace string.
+A callable factory produced by `defineStore`. The `$namespace` property holds the IID namespace string.
 
 ## `ViewProps<S>`
 
@@ -81,13 +81,12 @@ Recursively makes all properties readonly. Applied to store models to prevent vi
 
 ```typescript
 interface StoreMetaData {
-    readonly "#namespace": string;
-    readonly "#id": string;
-    readonly "#context": Container<any>;
-    readonly "#state": "INITIALIZING" | "READY" | "DISPOSING" | "DISPOSED";
-    readonly "#ready": boolean;
-    readonly "#initComplete": Promise<void>;
-    readonly "#disposeComplete": Promise<void>;
+    readonly "$namespace": string;
+    readonly "$id": string;
+    readonly "$state": "INITIALIZING" | "READY" | "DISPOSING" | "DISPOSED";
+    readonly "$ready": boolean;
+    readonly "$initComplete": Promise<void>;
+    readonly "$disposeComplete": Promise<void>;
 }
 ```
 

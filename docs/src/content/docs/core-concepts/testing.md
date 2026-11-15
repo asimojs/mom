@@ -41,7 +41,7 @@ describe("CountDown", () => {
 
     async function init(params?: CountDownDef["params"]) {
         store = createStore(CountDown, { context, ...params });
-        await store["#initComplete"];
+        await store.$initComplete;
     }
 });
 ```
@@ -54,7 +54,7 @@ A common pattern is to define a local `init()` function that creates the store a
 async function init(params?: CountDownDef["params"], awaitInit = true) {
     store = createStore(CountDown, { context, ...params });
     if (awaitInit) {
-        await store["#initComplete"];
+        await store.$initComplete;
     }
 }
 ```
@@ -73,10 +73,10 @@ The `FakeTimeServiceController` lets you control time in tests:
 ```typescript
 it("should support default values", async () => {
     await init({}, false);
-    expect(store["#ready"]).toBe(false);  // async init not complete
+    expect(store.$ready).toBe(false);  // async init not complete
 
-    await store["#initComplete"];
-    expect(store["#ready"]).toBe(true);
+    await store.$initComplete;
+    expect(store.$ready).toBe(true);
 
     // autoStart defaults to false — counter shouldn't change
     timeController.moveTime(2000);
@@ -126,12 +126,12 @@ You can verify lifecycle behavior by not awaiting init:
 ```typescript
 it("should start in INITIALIZING state", async () => {
     await init({}, false);  // don't await init
-    expect(store["#state"]).toBe("INITIALIZING");
-    expect(store["#ready"]).toBe(false);
+    expect(store.$state).toBe("INITIALIZING");
+    expect(store.$ready).toBe(false);
 
-    await store["#initComplete"];
-    expect(store["#state"]).toBe("READY");
-    expect(store["#ready"]).toBe(true);
+    await store.$initComplete;
+    expect(store.$state).toBe("READY");
+    expect(store.$ready).toBe(true);
 });
 ```
 
@@ -142,7 +142,7 @@ Stores that don't use external services can be tested without a custom context:
 ```typescript
 it("should increment", async () => {
     const store = createStore(Counter, { value: 5 });
-    await store["#initComplete"];
+    await store.$initComplete;
 
     expect(store.value).toBe(5);
     store.increment();
@@ -157,7 +157,7 @@ it("should increment", async () => {
 - **No DOM needed** — test store logic directly with vitest/jest
 - **Fake services** provide controllable replacements for browser APIs
 - **Test containers** extend `rootContext` to inherit defaults while overriding specific services
-- **`#initComplete`** and `#ready` help test async initialization
+- **`$initComplete`** and `$ready` help test async initialization
 - Tests are fast, deterministic, and easy to maintain
 
 ## Next

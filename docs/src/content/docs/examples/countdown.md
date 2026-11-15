@@ -113,7 +113,7 @@ import { ViewProps } from "@asimojs/mom";
 import { CountDownStore } from "./store.types";
 
 export const CountDownView = observer(({ store }: ViewProps<CountDownStore>) => {
-    if (!store["#ready"]) return <div>Loading...</div>;
+    if (!store.$ready) return <div>Loading...</div>;
 
     return (
         <div>
@@ -126,7 +126,7 @@ export const CountDownView = observer(({ store }: ViewProps<CountDownStore>) => 
 });
 ```
 
-Note the `#ready` check — since `onInit` is async, the store may not be ready during the first render.
+Note the `$ready` check — since `onInit` is async, the store may not be ready during the first render.
 
 ## Test
 
@@ -153,7 +153,7 @@ describe("CountDown", () => {
 
     async function init(params = {}) {
         store = createStore(CountDown, { context, ...params });
-        await store["#initComplete"];
+        await store.$initComplete;
     }
 
     it("should countdown with fake time", async () => {

@@ -43,10 +43,10 @@ describe("Mom mount+unmount", () => {
             expect(store.next).toBe(null);
 
             store.createNext("B");
-            expect(store.next?.["#ready"]).toBe(true);
+            expect(store.next?.$ready).toBe(true);
             expect(store.next?.value).toBe("A+B");
 
-            expect(store["#id"]).not.toBe(store.next!["#id"]);
+            expect(store.$id).not.toBe(store.next!.$id);
 
             store.next!.createNext("C");
             expect(store.next!.next!.value).toBe("A+B+C");
@@ -65,16 +65,16 @@ describe("Mom mount+unmount", () => {
             a.deleteNext();
             expect(a.next).toBe(null);
             expect(a.value).toBe("A");
-            expect(a["#ready"]).toBe(true);
-            expect(a["#state"]).toBe("READY");
+            expect(a.$ready).toBe(true);
+            expect(a.$state).toBe("READY");
 
-            expect(b["#state"]).toBe("DISPOSED");
-            expect(b["#ready"]).toBe(false);
+            expect(b.$state).toBe("DISPOSED");
+            expect(b.$ready).toBe(false);
             expect(b.value).toBe("A+BD");
             expect(b.next).not.toBe(null);
 
-            expect(c["#state"]).toBe("DISPOSED");
-            expect(c["#ready"]).toBe(false);
+            expect(c.$state).toBe("DISPOSED");
+            expect(c.$ready).toBe(false);
             expect(c.value).toBe("A+B+CD");
             expect(c.next).toBe(null);
         });

@@ -20,10 +20,8 @@ describe("Counter", () => {
         it("should support value prop", async () => {
             const counter = createStore(Counter, { value: 42, minFormatDigits: 3 });
 
-            expect(counter["#namespace"]).toBe("");
-            expect(counter["#id"].match(/^\#(\d+)$/)?.[1]).not.toBeUndefined();
-            expect(counter["#context"].name).toBe("asm"); // TODO
-            expect(counter["#context"].path).toBe("/asm"); // TODO: /asm/test:Counter
+            expect(counter.$namespace).toBe("");
+            expect(counter.$id.match(/^\#(\d+)$/)?.[1]).not.toBeUndefined();
             expect(counter.value).toBe(42);
             expect(counter.formattedValue).toBe("042");
         });
@@ -31,9 +29,7 @@ describe("Counter", () => {
         it("should support no params", async () => {
             const counter = createStore(Counter);
 
-            expect(counter["#namespace"]).toBe("");
-            expect(counter["#context"].name).toBe("asm");
-            expect(counter["#context"].path).toBe("/asm");
+            expect(counter.$namespace).toBe("");
             expect(counter.value).toBe(0);
             expect(counter.formattedValue).toBe("00");
         });

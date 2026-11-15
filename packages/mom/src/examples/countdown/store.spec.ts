@@ -25,7 +25,7 @@ describe("CountDown", () => {
     async function init(params?: CountDownParams, awaitInitComplete = true) {
         store = createStore(CountDown, { context, ...params });
         if (awaitInitComplete) {
-            await store["#initComplete"];
+            await store.$initComplete;
         }
     }
 
@@ -35,13 +35,13 @@ describe("CountDown", () => {
         // section#defaultValues
         it("should support default values", async () => {
             await init({}, false);
-            expect(store["#ready"]).toBe(false); // async init
+            expect(store.$ready).toBe(false); // async init
 
             expect(store.value).toBe(10);
             expect(store.isRunning).toBe(false);
 
-            await store["#initComplete"];
-            expect(store["#ready"]).toBe(true);
+            await store.$initComplete;
+            expect(store.$ready).toBe(true);
 
             // test that the default autoStart is false
             timeController.moveTime(2000); // 2s
@@ -61,7 +61,7 @@ describe("CountDown", () => {
             let error = "";
             try {
                 store = createStore(CountDown);
-                await store["#initComplete"];
+                await store.$initComplete;
             } catch (ex) {
                 error = "" + ex;
             }
@@ -72,7 +72,7 @@ describe("CountDown", () => {
 
         it("should override default values", async () => {
             await init({ initValue: 5, intervalMs: 5 });
-            expect(store["#ready"]).toBe(true);
+            expect(store.$ready).toBe(true);
             expect(store.value).toBe(5);
             expect(store.isRunning).toBe(false);
 
@@ -83,7 +83,7 @@ describe("CountDown", () => {
 
         it("should support auto-start", async () => {
             await init({ initValue: 5, intervalMs: 5, autoStart: true });
-            expect(store["#ready"]).toBe(true);
+            expect(store.$ready).toBe(true);
             expect(store.value).toBe(5);
             expect(store.isRunning).toBe(true); // auto-start
 
@@ -97,7 +97,7 @@ describe("CountDown", () => {
         // section#start-stop
         it("should support start / stop (autoStart false)", async () => {
             await init({ intervalMs: 5 });
-            expect(store["#ready"]).toBe(true);
+            expect(store.$ready).toBe(true);
             expect(store.value).toBe(10);
             expect(store.isRunning).toBe(false);
 
@@ -140,7 +140,7 @@ describe("CountDown", () => {
 
         it("should support start / stop (autoStart true)", async () => {
             await init({ intervalMs: 5, autoStart: true });
-            expect(store["#ready"]).toBe(true);
+            expect(store.$ready).toBe(true);
             expect(store.value).toBe(10);
 
             expect(store.isRunning).toBe(true);
@@ -169,9 +169,9 @@ describe("CountDown", () => {
             expect(store.isRunning).toBe(true);
 
             disposeStore(store);
-            await store["#disposeComplete"];
+            await store.$disposeComplete;
             expect(store.isRunning).toBe(false);
-            expect(store["#state"]).toBe("DISPOSED");
+            expect(store.$state).toBe("DISPOSED");
         });
     });
 });

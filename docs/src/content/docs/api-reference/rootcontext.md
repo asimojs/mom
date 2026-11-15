@@ -23,7 +23,7 @@ All root stores created with `createStore` use `rootContext` as their default Io
 
 ```typescript
 const store = createStore(Counter);
-// store["#context"] === rootContext (or a descendant)
+// The store uses rootContext (or a descendant) as its IoC context
 ```
 
 ### Extending for tests
