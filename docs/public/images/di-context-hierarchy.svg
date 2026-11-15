@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" width="720" height="300" fill="none">
+  <defs>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="360" y="22" text-anchor="middle" fill="#565f89" font-size="14" font-weight="500">IoC container hierarchy — child containers inherit from parents</text>
+
+  <!-- rootContext -->
+  <rect x="240" y="40" width="240" height="72" rx="12" fill="#1a1b26" stroke="#bb9af7" stroke-width="2"/>
+  <text x="360" y="66" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">rootContext</text>
+  <rect x="256" y="80" width="208" height="22" rx="4" fill="#24283b"/>
+  <text x="360" y="96" text-anchor="middle" fill="#bb9af7" font-size="11">TimeServiceIID -> BrowserTimeService</text>
+
+  <!-- Lines from rootContext to children -->
+  <line x1="310" y1="112" x2="170" y2="148" stroke="#565f89" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <line x1="410" y1="112" x2="550" y2="148" stroke="#565f89" stroke-width="1.5" stroke-dasharray="5 3"/>
+
+  <!-- c1 container -->
+  <rect x="40" y="148" width="260" height="72" rx="12" fill="#1a1b26" stroke="#9ece6a" stroke-width="2"/>
+  <text x="170" y="174" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">c1</text>
+  <rect x="56" y="188" width="228" height="22" rx="4" fill="#24283b"/>
+  <text x="170" y="204" text-anchor="middle" fill="#9ece6a" font-size="11">StorageServiceIID -> LocalStorageService</text>
+
+  <!-- c2 container -->
+  <rect x="420" y="148" width="260" height="72" rx="12" fill="#1a1b26" stroke="#7aa2f7" stroke-width="2"/>
+  <text x="550" y="174" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">c2  (test context)</text>
+  <rect x="436" y="188" width="228" height="22" rx="4" fill="#24283b"/>
+  <text x="550" y="204" text-anchor="middle" fill="#7aa2f7" font-size="11">StorageServiceIID -> MockStorageService</text>
+
+  <!-- fetch arrows and labels -->
+  <text x="170" y="244" text-anchor="middle" fill="#9ece6a" font-size="12">c1.fetch(TimeServiceIID)</text>
+  <text x="170" y="260" text-anchor="middle" fill="#565f89" font-size="11">not in c1 -> found in rootContext</text>
+
+  <text x="550" y="244" text-anchor="middle" fill="#7aa2f7" font-size="12">c2.fetch(StorageServiceIID)</text>
+  <text x="550" y="260" text-anchor="middle" fill="#565f89" font-size="11">found in c2 -> MockStorageService</text>
+
+  <!-- Bottom label -->
+  <text x="360" y="292" text-anchor="middle" fill="#565f89" font-size="12" font-style="italic">Lookup walks up the chain: child -> parent -> rootContext</text>
+</svg>

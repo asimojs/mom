@@ -12,7 +12,10 @@
         "test": "pnpm run test-mom",
         "build-mom": "pnpm --filter @asimojs/mom build",
         "build": "pnpm run build-mom",
-        "prepublishOnly": "pnpm run build && pnpm test"
+        "prepublishOnly": "pnpm run build && pnpm test",
+        "docs:dev": "pnpm --filter @asimojs/mom-docs dev",
+        "docs:build": "pnpm --filter @asimojs/mom-docs build",
+        "docs:preview": "pnpm --filter @asimojs/mom-docs preview"
     },
     "packageManager": "pnpm@10.30.3"
 }

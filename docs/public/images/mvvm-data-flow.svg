@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 160" width="700" height="160" fill="none">
+  <defs>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    </style>
+    <marker id="af-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#9ece6a" stroke-width="1.3"/>
+    </marker>
+    <marker id="af-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#7aa2f7" stroke-width="1.3"/>
+    </marker>
+  </defs>
+
+  <!-- Step 1: User Action -->
+  <rect x="20" y="40" width="130" height="72" rx="10" fill="#1a1b26" stroke="#7aa2f7" stroke-width="2"/>
+  <text x="85" y="70" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">User Action</text>
+  <text x="85" y="90" text-anchor="middle" fill="#565f89" font-size="12">click, type, etc.</text>
+
+  <!-- Arrow 1→2 -->
+  <path d="M154 76 L200 76" stroke="#7aa2f7" stroke-width="1.8" marker-end="url(#af-blue)"/>
+
+  <!-- Step 2: Store Action -->
+  <rect x="206" y="40" width="140" height="72" rx="10" fill="#1a1b26" stroke="#bb9af7" stroke-width="2"/>
+  <text x="276" y="70" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">Store Action</text>
+  <text x="276" y="90" text-anchor="middle" fill="#565f89" font-size="12">method on model</text>
+
+  <!-- Arrow 2→3 -->
+  <path d="M350 76 L396 76" stroke="#9ece6a" stroke-width="1.8" marker-end="url(#af-green)"/>
+
+  <!-- Step 3: Model Update -->
+  <rect x="402" y="40" width="140" height="72" rx="10" fill="#1a1b26" stroke="#9ece6a" stroke-width="2"/>
+  <text x="472" y="70" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">Model Update</text>
+  <text x="472" y="90" text-anchor="middle" fill="#565f89" font-size="12">observable change</text>
+
+  <!-- Arrow 3→4 -->
+  <path d="M546 76 L592 76" stroke="#9ece6a" stroke-width="1.8" marker-end="url(#af-green)"/>
+
+  <!-- Step 4: View Re-render -->
+  <rect x="598" y="40" width="80" height="72" rx="10" fill="#1a1b26" stroke="#7aa2f7" stroke-width="2"/>
+  <text x="638" y="70" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">View</text>
+  <text x="638" y="90" text-anchor="middle" fill="#565f89" font-size="12">re-renders</text>
+
+  <!-- Label -->
+  <text x="350" y="145" text-anchor="middle" fill="#565f89" font-size="13" font-style="italic">Unidirectional data flow: Action → Model → View</text>
+</svg>

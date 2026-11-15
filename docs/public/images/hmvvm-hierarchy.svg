@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 340" width="720" height="340" fill="none">
+  <defs>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    </style>
+    <marker id="hm-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#bb9af7" stroke-width="1.3"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="360" y="22" text-anchor="middle" fill="#565f89" font-size="14" font-weight="500">Hierarchical MVVM — ViewModels compose as a tree</text>
+
+  <!-- Root Store -->
+  <rect x="260" y="44" width="200" height="64" rx="12" fill="#1a1b26" stroke="#bb9af7" stroke-width="2"/>
+  <text x="360" y="70" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">AppStore</text>
+  <text x="360" y="90" text-anchor="middle" fill="#565f89" font-size="12">root ViewModel</text>
+
+  <!-- Connecting lines from root to children -->
+  <line x1="310" y1="108" x2="150" y2="150" stroke="#bb9af7" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <line x1="360" y1="108" x2="360" y2="150" stroke="#bb9af7" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <line x1="410" y1="108" x2="570" y2="150" stroke="#bb9af7" stroke-width="1.5" stroke-dasharray="5 3"/>
+
+  <!-- Child Store 1: NavStore -->
+  <rect x="50" y="150" width="200" height="64" rx="12" fill="#1a1b26" stroke="#bb9af7" stroke-width="2"/>
+  <text x="150" y="176" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">NavStore</text>
+  <text x="150" y="196" text-anchor="middle" fill="#565f89" font-size="12">child ViewModel</text>
+
+  <!-- Child Store 2: FormStore -->
+  <rect x="260" y="150" width="200" height="64" rx="12" fill="#1a1b26" stroke="#9ece6a" stroke-width="2"/>
+  <text x="360" y="176" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">LoginFormStore</text>
+  <text x="360" y="196" text-anchor="middle" fill="#565f89" font-size="12">parent ViewModel</text>
+
+  <!-- Child Store 3: SettingsStore -->
+  <rect x="470" y="150" width="200" height="64" rx="12" fill="#1a1b26" stroke="#bb9af7" stroke-width="2"/>
+  <text x="570" y="176" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">SettingsStore</text>
+  <text x="570" y="196" text-anchor="middle" fill="#565f89" font-size="12">child ViewModel</text>
+
+  <!-- Connecting lines from FormStore to grandchildren -->
+  <line x1="310" y1="214" x2="200" y2="256" stroke="#9ece6a" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <line x1="360" y1="214" x2="360" y2="256" stroke="#9ece6a" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <line x1="410" y1="214" x2="520" y2="256" stroke="#9ece6a" stroke-width="1.5" stroke-dasharray="5 3"/>
+
+  <!-- Grandchild 1: TextInput (login) -->
+  <rect x="100" y="256" width="200" height="64" rx="12" fill="#1a1b26" stroke="#7aa2f7" stroke-width="2"/>
+  <text x="200" y="282" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">TextInput</text>
+  <text x="200" y="302" text-anchor="middle" fill="#565f89" font-size="12">login field</text>
+
+  <!-- Grandchild 2: TextInput (password) -->
+  <rect x="310" y="256" width="100" height="64" rx="12" fill="#1a1b26" stroke="#7aa2f7" stroke-width="2"/>
+  <text x="360" y="282" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">TextInput</text>
+  <text x="360" y="302" text-anchor="middle" fill="#565f89" font-size="12">password</text>
+
+  <!-- Grandchild 3: Action (login button) -->
+  <rect x="420" y="256" width="200" height="64" rx="12" fill="#1a1b26" stroke="#7aa2f7" stroke-width="2"/>
+  <text x="520" y="282" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">Action</text>
+  <text x="520" y="302" text-anchor="middle" fill="#565f89" font-size="12">login button</text>
+
+  <!-- Legend -->
+  <text x="360" y="338" text-anchor="middle" fill="#565f89" font-size="12" font-style="italic">Parent stores mount children and coordinate them through their models</text>
+</svg>

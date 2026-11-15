@@ -1,0 +1,15 @@
+{
+    "name": "@asimojs/mom-docs",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview"
+    },
+    "devDependencies": {
+        "@astrojs/sitemap": "~3.2.1",
+        "@astrojs/starlight": "~0.29.3",
+        "astro": "^4.16.19"
+    }
+}

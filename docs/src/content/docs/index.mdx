@@ -1,0 +1,117 @@
+---
+title: mom
+description: MobX micro-stores for React — organized the HMVVM way
+template: splash
+hero:
+    tagline: MobX micro-stores for React — organized the HMVVM way
+    actions:
+        - text: Getting Started
+          link: /mom/getting-started
+          icon: right-arrow
+          variant: primary
+        - text: Core Concepts
+          link: /mom/core-concepts/why-stores
+          variant: minimal
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+## Why mom?
+
+Modern React apps mix state, logic, and rendering inside components. As apps grow, this leads to bloated components, tangled prop drilling, and hard-to-test logic buried in hooks and effects.
+
+**Mom fixes this** by extracting all state and logic into small, observable **stores** (ViewModels) that are fully decoupled from your React views. Your components become thin mapping layers — easy to read, easy to swap, easy to test.
+
+<CardGrid>
+    <Card title="Full View / Model Decoupling" icon="open-book">
+        All state and logic lives in stores. React components only *map* data to UI — no useState, no useEffect, no business logic in JSX. Views become trivial to read and refactor.
+    </Card>
+    <Card title="Testability Without the DOM" icon="approve-check">
+        Since all logic is in plain TypeScript stores, you test with vitest/jest directly — no DOM emulation, no React Testing Library gymnastics. Tests are fast, deterministic, and cover the code that matters.
+    </Card>
+    <Card title="Readability & Maintainability" icon="document">
+        Prescriptive conventions (one folder per store, standardized file names) make large codebases navigable. New developers — and AI tools — know exactly where to find things.
+    </Card>
+    <Card title="Progressive Application Loading" icon="rocket">
+        Stores load on demand via the IoC container. Only the code your user needs ships to the browser — the rest loads when first requested.
+    </Card>
+    <Card title="Composability" icon="puzzle">
+        Stores compose hierarchically: parent stores mount children, coordinate them, react to their changes. Build complex UIs from small, focused pieces that snap together.
+    </Card>
+    <Card title="Reusable Models, Swappable Views" icon="random">
+        The same store can power different React components — a desktop layout and a mobile layout, a full editor and a read-only summary. Change the view without touching the logic.
+    </Card>
+    <Card title="Type Safety" icon="seti:typescript">
+        Full TypeScript inference across stores, params, models, and views. No manual generics — define your types once and they flow everywhere.
+    </Card>
+    <Card title="Built-in Dependency Inversion" icon="setting">
+        Swap real browser APIs for fakes in tests. Inject different service implementations per context. All powered by asimo's IoC containers.
+    </Card>
+</CardGrid>
+
+## What mom adds to MobX
+
+MobX provides the reactive observable engine. Mom adds the structure to organize it at scale:
+
+- **Lifecycle management** — stores follow a clear `INITIALIZING → READY → DISPOSING → DISPOSED` state machine, with `onInit` and `onDispose` hooks to create and tear down hierarchies of micro-stores
+- **Async initialization and disposal** — stores can fetch data or acquire resources asynchronously at init, and clean up gracefully on dispose
+- **Async code loading** — store implementations can be loaded on demand through the IoC container, enabling code splitting *(coming soon)*
+- **Strong typings** — models are exposed as `DeepReadOnly` outside the store scope, preventing accidental mutations from views or parent stores
+- **Simple conventions** — standardized file structure and naming patterns (`store.ts`, `store.types.ts`, `store.view.tsx`, `XxxDef`, `XxxStore`, `XxxIID`) make codebases predictable
+
+## Quick Install
+
+```bash
+pnpm add @asimojs/mom mobx mobx-react-lite react
+```
+
+## Hello World
+
+Define a store — all state and logic in one place:
+
+```typescript
+// counter/store.ts
+import { defineStore } from "@asimojs/mom";
+
+export const Counter = defineStore((store) => {
+    const model = store.initModel({
+        value: 0,
+        increment() {
+            model.value++;
+        },
+    });
+    return model;
+});
+```
+
+The view just maps data to UI:
+
+```tsx
+// counter/store.view.tsx
+import { observer } from "mobx-react-lite";
+
+export const CounterView = observer(({ store }: { store: ReturnType<typeof Counter> }) => (
+    <div>
+        <span>{store.value}</span>
+        <button onClick={() => store.increment()}>+1</button>
+    </div>
+));
+```
+
+Mount it in your app:
+
+```tsx
+import { createStore } from "@asimojs/mom";
+import { Counter } from "./counter/store";
+import { CounterView } from "./counter/store.view";
+import { useState } from "react";
+
+function App() {
+    const [store] = useState(() => createStore(Counter));
+    return <CounterView store={store} />;
+}
+```
+
+---
+
+[Get started →](/mom/getting-started) · [Core Concepts →](/mom/core-concepts/why-stores)

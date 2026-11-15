@@ -3,7 +3,10 @@ old
 coverage
 dist
 dist-bundles
+docs-dist
 lib
 misc
 node_modules
 *.log
+docs/.astro
+docs/src/env.d.ts

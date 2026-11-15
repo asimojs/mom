@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 260" width="720" height="260" fill="none">
+  <defs>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    </style>
+    <marker id="rx-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#9ece6a" stroke-width="1.3"/>
+    </marker>
+    <marker id="rx-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#7aa2f7" stroke-width="1.3"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="360" y="22" text-anchor="middle" fill="#565f89" font-size="14" font-weight="500">MobX reactivity — observable data drives reactive functions automatically</text>
+
+  <!-- Observable State box -->
+  <rect x="20" y="44" width="180" height="140" rx="12" fill="#1a1b26" stroke="#bb9af7" stroke-width="2"/>
+  <text x="110" y="68" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">Observable State</text>
+  <rect x="36" y="82" width="148" height="24" rx="4" fill="#24283b"/>
+  <text x="110" y="99" text-anchor="middle" fill="#bb9af7" font-size="12">value: 42</text>
+  <rect x="36" y="114" width="148" height="24" rx="4" fill="#24283b"/>
+  <text x="110" y="131" text-anchor="middle" fill="#bb9af7" font-size="12">name: "hello"</text>
+  <text x="110" y="168" text-anchor="middle" fill="#565f89" font-size="11">initModel / initState</text>
+
+  <!-- Computed box -->
+  <rect x="270" y="44" width="180" height="140" rx="12" fill="#1a1b26" stroke="#9ece6a" stroke-width="2"/>
+  <text x="360" y="68" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">Computed Values</text>
+  <rect x="286" y="82" width="148" height="24" rx="4" fill="#24283b"/>
+  <text x="360" y="99" text-anchor="middle" fill="#9ece6a" font-size="12">get formatted() { ... }</text>
+  <rect x="286" y="114" width="148" height="24" rx="4" fill="#24283b"/>
+  <text x="360" y="131" text-anchor="middle" fill="#9ece6a" font-size="12">get isValid() { ... }</text>
+  <text x="360" y="168" text-anchor="middle" fill="#565f89" font-size="11">cached, auto-recalculated</text>
+
+  <!-- Reactive Functions box -->
+  <rect x="520" y="44" width="180" height="140" rx="12" fill="#1a1b26" stroke="#7aa2f7" stroke-width="2"/>
+  <text x="610" y="68" text-anchor="middle" fill="#c0caf5" font-size="15" font-weight="600">Reactive Functions</text>
+  <rect x="536" y="82" width="148" height="24" rx="4" fill="#24283b"/>
+  <text x="610" y="99" text-anchor="middle" fill="#7aa2f7" font-size="12">observer() — views</text>
+  <rect x="536" y="114" width="148" height="24" rx="4" fill="#24283b"/>
+  <text x="610" y="131" text-anchor="middle" fill="#7aa2f7" font-size="12">autorun() — effects</text>
+  <rect x="536" y="146" width="148" height="24" rx="4" fill="#24283b"/>
+  <text x="610" y="163" text-anchor="middle" fill="#7aa2f7" font-size="12">reaction() — targeted</text>
+
+  <!-- Arrow: Observable → Computed -->
+  <path d="M204 114 L264 114" stroke="#9ece6a" stroke-width="1.8" marker-end="url(#rx-green)"/>
+  <text x="234" y="106" text-anchor="middle" fill="#9ece6a" font-size="11">derives</text>
+
+  <!-- Arrow: Computed → Reactive -->
+  <path d="M454 114 L514 114" stroke="#7aa2f7" stroke-width="1.8" marker-end="url(#rx-blue)"/>
+  <text x="484" y="106" text-anchor="middle" fill="#7aa2f7" font-size="11">triggers</text>
+
+  <!-- Arrow: Observable → Reactive (direct, curved below) -->
+  <path d="M200 170 Q360 240 520 170" stroke="#7aa2f7" stroke-width="1.5" stroke-dasharray="5 3" fill="none" marker-end="url(#rx-blue)"/>
+  <text x="360" y="232" text-anchor="middle" fill="#7aa2f7" font-size="11">direct subscription (no computed needed)</text>
+
+  <!-- Bottom label -->
+  <text x="360" y="256" text-anchor="middle" fill="#565f89" font-size="12" font-style="italic">Dependencies detected at runtime — no manual subscriptions needed</text>
+</svg>
